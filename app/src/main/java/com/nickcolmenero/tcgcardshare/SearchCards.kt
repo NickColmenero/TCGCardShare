@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import coil.size.Size
 import com.nickcolmenero.tcgcardshare.API.Scryfall.Card
 import com.nickcolmenero.tcgcardshare.API.Scryfall.CardViewModel
 import com.nickcolmenero.tcgcardshare.homepage.NavigationDrawerContent
