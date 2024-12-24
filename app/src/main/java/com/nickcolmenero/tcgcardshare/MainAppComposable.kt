@@ -40,6 +40,9 @@ fun MainApp() {
             composable("passwordreset") {
                 PasswordResetScreen(navController)
             }
+            composable("CardSearchScreen") {
+                CardSearchScreen(navController)
+            }
         }
     }
 }
