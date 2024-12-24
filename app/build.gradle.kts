@@ -87,4 +87,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.coil)
     implementation(libs.androidx.foundation)
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor)
 }

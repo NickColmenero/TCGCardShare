@@ -33,6 +33,10 @@ fun NavigationDrawerContent(navController: NavController) {
         }
         TextButton(onClick = { navController.navigate("passwordreset") }) {
             Text("Password Reset")
+
+        }
+        TextButton(onClick = { navController.navigate("CardSearchScreen") }) {
+            Text("Search for cards")
         }
     }
 }
