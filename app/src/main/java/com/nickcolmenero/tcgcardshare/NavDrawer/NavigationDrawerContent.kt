@@ -1,15 +1,20 @@
-package com.nickcolmenero.tcgcardshare.homepage
+package com.nickcolmenero.tcgcardshare.NavDrawer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
@@ -17,25 +22,20 @@ import androidx.navigation.NavController
 fun NavigationDrawerContent(navController: NavController) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+            .fillMaxHeight()
+            .fillMaxWidth(.5F)
             .padding(16.dp)
     ) {
+
         Text(text = "Navigation", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = { navController.navigate("home") }) {
+        TextButton(modifier = Modifier.fillMaxWidth(),onClick = { navController.navigate("home") }) {
             Text("Home")
         }
-        TextButton(onClick = { navController.navigate("signin") }) {
-            Text("Sign In")
-        }
-        TextButton(onClick = { navController.navigate("signup") }) {
-            Text("Sign Up")
-        }
-        TextButton(onClick = { navController.navigate("passwordreset") }) {
-            Text("Password Reset")
 
-        }
-        TextButton(onClick = { navController.navigate("CardSearchScreen") }) {
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CardSearchScreen") }) {
+
             Text("Search for cards")
         }
     }
