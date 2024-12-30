@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.nickcolmenero.tcgcardshare.SeachCards.CardSearchScreen
 import com.nickcolmenero.tcgcardshare.homepage.Homepage
 import com.nickcolmenero.tcgcardshare.login.passwordreset.PasswordResetScreen
 import com.nickcolmenero.tcgcardshare.login.signin.SignInScreen

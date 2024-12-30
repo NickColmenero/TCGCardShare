@@ -1,4 +1,4 @@
-package com.nickcolmenero.tcgcardshare
+package com.nickcolmenero.tcgcardshare.SeachCards
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +41,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.nickcolmenero.tcgcardshare.API.Scryfall.Card
 import com.nickcolmenero.tcgcardshare.API.Scryfall.CardViewModel
-import com.nickcolmenero.tcgcardshare.homepage.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,9 +57,11 @@ fun CardSearchScreen(navController: NavController, viewModel: CardViewModel = vi
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        modifier = Modifier,
         drawerContent = {
             NavigationDrawerContent(navController)
         }
+
     ) {
         Scaffold(
             topBar = {
@@ -83,51 +85,51 @@ fun CardSearchScreen(navController: NavController, viewModel: CardViewModel = vi
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    if (isSearching && card == null && error == null) {
+                        CircularProgressIndicator()
+                    }
+                    card?.let {
+                        CardInfoDisplay(card = it)
+                    }
+                    error?.let {
+                        Text(text = it, color = Color.Red)
+                    }
 
-            }
-        }
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (isSearching && card == null && error == null) {
-            CircularProgressIndicator()
-        }
-        card?.let {
-            CardInfoDisplay(card = it)
-        }
-        error?.let {
-            Text(text = it, color = Color.Red)
-        }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = cardName,
+                        onValueChange = { cardName = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = cardName,
-            onValueChange = { cardName = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+                    Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
 
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-
-            Button(onClick = {
-                if (cardName.isNotEmpty()) {
-                    viewModel.searchCard(cardName)
-                    isSearching = true
+                        Button(onClick = {
+                            if (cardName.isNotEmpty()) {
+                                viewModel.searchCard(cardName)
+                                isSearching = true
+                            }
+                        }){
+                            Text("Search")
+                        }
+                    }
                 }
-            }){
-                Text("Search")
             }
         }
     }
+
 }
 
 @Composable
