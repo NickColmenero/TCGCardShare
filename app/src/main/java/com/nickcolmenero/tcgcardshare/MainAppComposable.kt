@@ -18,7 +18,6 @@ import com.nickcolmenero.tcgcardshare.login.signup.SignUpScreen
 
 @Composable
 fun MainApp() {
-    val  darkTheme = 
     Surface(
         modifier = Modifier
             .fillMaxSize()
