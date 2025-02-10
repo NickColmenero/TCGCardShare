@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.nickcolmenero.tcgcardshare.API.Scryfall.Card
+import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
 import com.nickcolmenero.tcgcardshare.API.Scryfall.CardViewModel
 import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
 import kotlinx.coroutines.launch
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 fun CardSearchScreen(navController: NavController, viewModel: CardViewModel = viewModel()) {
     var cardName by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
-    val card by remember { viewModel.card }
+    val card by remember { viewModel.scryfallDBCard }
     val error by remember { viewModel.error }
     // for navigation on side
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -96,7 +96,7 @@ fun CardSearchScreen(navController: NavController, viewModel: CardViewModel = vi
                         CircularProgressIndicator()
                     }
                     card?.let {
-                        CardInfoDisplay(card = it)
+                        CardInfoDisplay(scryfallDBCard = it)
                     }
                     error?.let {
                         Text(text = it, color = Color.Red)
@@ -133,21 +133,21 @@ fun CardSearchScreen(navController: NavController, viewModel: CardViewModel = vi
 }
 
 @Composable
-fun CardInfoDisplay(card: Card) {
+fun CardInfoDisplay(scryfallDBCard: ScryfallDBCard) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = card.name, fontSize = 16.sp)
-        Text(text = "Type: ${card.type_line}")
-        Text(text = "Mana Cost: ${card.mana_cost ?: "N/A"}")
-        Text(text = "Rarity: ${card.rarity}")
+        Text(text = scryfallDBCard.name, fontSize = 16.sp)
+        Text(text = "Type: ${scryfallDBCard.type_line}")
+        Text(text = "Mana Cost: ${scryfallDBCard.mana_cost ?: "N/A"}")
+        Text(text = "Rarity: ${scryfallDBCard.rarity}")
         Row {
-            if (card.power != null) {
-                Text(text = "Power: ${card.power}")
+            if (scryfallDBCard.power != null) {
+                Text(text = "Power: ${scryfallDBCard.power}")
             }
-            if (card.toughness != null) {
-                Text(text = " Toughness: ${card.toughness}")
+            if (scryfallDBCard.toughness != null) {
+                Text(text = " Toughness: ${scryfallDBCard.toughness}")
             }
         }
-        card.image_uris?.get("normal")?.let {
+        scryfallDBCard.image_uris?.get("normal")?.let {
             Image(painter = rememberAsyncImagePainter(it),
                 contentDescription = "Card Image",
                 modifier = Modifier.size(600.dp)

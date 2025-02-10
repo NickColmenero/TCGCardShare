@@ -32,8 +32,16 @@ fun NavigationDrawerContent(navController: NavController) {
         }
 
         TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CardSearchScreen") }) {
-
             Text("Search for cards")
+        }
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CreateDeckList") }) {
+            Text("Create a decklist")
+        }
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("LocalScryfallSearch") }) {
+            Text("Create a decklistLocal")
+        }
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("AskAI") }) {
+            Text("Ask AI")
         }
     }
 }
