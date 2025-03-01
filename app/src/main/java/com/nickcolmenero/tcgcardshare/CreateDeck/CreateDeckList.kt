@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
@@ -241,6 +243,24 @@ fun CreateDeckList(navController: NavController, viewModel: CardViewModel = view
                                 Icon(Icons.Default.Delete, contentDescription = "Remove Card")
                             }
                         }
+                    }
+                }
+
+                // Button to generate comma-separated list
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            // Generate the comma-separated list of card names
+                            val deckListCompleted = viewModel.decklist.value.joinToString(", ") { it.name }
+                            navController.navigate("AIDeckHelp/${deckListCompleted}")
+                            println("Comma-separated list: $deckListCompleted")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Generate Comma-Separated List")
                     }
                 }
             }
