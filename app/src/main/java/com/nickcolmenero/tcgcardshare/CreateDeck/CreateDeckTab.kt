@@ -58,8 +58,6 @@ fun CurrentDeckTab(
     val currentUser = Firebase.auth.currentUser?.uid.orEmpty()
     val firestore = Firebase.firestore
     val decklistRef = firestore.collection("users").document(currentUser)
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val deckSize = viewModel.decklist.value.size
@@ -103,7 +101,7 @@ fun CurrentDeckTab(
                             contentDescription = "Dropdown Icon"
                         )
                     },
-                    modifier = Modifier.menuAnchor()
+                    modifier = Modifier.menuAnchor() // NEEDED FOR FORMATS TO DISPLAY!
                 )
 
                 ExposedDropdownMenu(
