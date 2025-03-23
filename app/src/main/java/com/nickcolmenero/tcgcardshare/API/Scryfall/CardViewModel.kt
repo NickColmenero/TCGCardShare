@@ -9,8 +9,7 @@ import java.io.IOException
 import androidx.compose.runtime.mutableStateOf
 
 class CardViewModel : ViewModel() {
-
-    var card = mutableStateOf<Card?>(null)
+    var scryfallDBCard = mutableStateOf<ScryfallDBCard?>(null)
     var error = mutableStateOf<String?>(null)
 
     fun searchCard(cardName: String) {
@@ -18,14 +17,14 @@ class CardViewModel : ViewModel() {
             try {
                 delay(100)
                 val fetchedCard = RetrofitInstance.api.getCardByName(cardName)
-                card.value = fetchedCard
+                scryfallDBCard.value = fetchedCard
                 error.value = null
             } catch (e: HttpException) {
                 error.value = "HTTP error: ${e.message}"
-                card.value = null
+                scryfallDBCard.value = null
             } catch (e: IOException) {
                 error.value = "Network error: ${e.message}"
-                card.value = null
+                scryfallDBCard.value = null
             }
         }
     }

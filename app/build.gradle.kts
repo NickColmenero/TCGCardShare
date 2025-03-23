@@ -26,8 +26,8 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,20 +75,21 @@ dependencies {
     implementation(libs.landscapist.glide)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.appcompat)
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.material)
-    implementation(libs.dagger.hilt.android)
-    implementation(libs.firebase.auth)
-    implementation(libs.androidx.credentials)
     implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
     implementation(libs.androidx.runtime.livedata)
     kapt(libs.dagger.hilt.compiler)
     implementation(libs.dagger.hilt.compose)
-    implementation(libs.hilt.android)
-    implementation(libs.coil)
+    implementation(libs.dagger.hilt.android)
     implementation(libs.androidx.foundation)
-    implementation (libs.retrofit)
-    implementation (libs.converter.gson)
-    implementation (libs.logging.interceptor)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+    implementation(platform(libs.firebase.bom))
+
 }
