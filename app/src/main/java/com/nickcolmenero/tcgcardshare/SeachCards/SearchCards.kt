@@ -150,7 +150,7 @@ fun CardInfoDisplay(scryfallDBCard: ScryfallDBCard) {
         scryfallDBCard.image_uris?.get("normal")?.let {
             Image(painter = rememberAsyncImagePainter(it),
                 contentDescription = "Card Image",
-                modifier = Modifier.size(600.dp)
+                modifier = Modifier.size(500.dp)
             )
         }
     }

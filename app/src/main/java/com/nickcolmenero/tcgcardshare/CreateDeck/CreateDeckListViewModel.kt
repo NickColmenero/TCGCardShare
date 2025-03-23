@@ -1,7 +1,8 @@
 package com.nickcolmenero.tcgcardshare.CreateDeck
 
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,10 +18,10 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class CreateDeckListViewModel  @Inject constructor() : ViewModel() {
+class CreateDeckListViewModel @Inject constructor() : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     var scryfallDBCard = mutableStateOf<ScryfallDBCard?>(null)
-    val deck: MutableState<ScryfallDBCard?> = scryfallDBCard
+    val decklist = mutableStateOf<List<ScryfallDBCard>>(emptyList()) // Maintain decklist here
     var error = mutableStateOf<String?>(null)
 
     fun searchCard(cardName: String) {
@@ -40,5 +41,24 @@ class CreateDeckListViewModel  @Inject constructor() : ViewModel() {
         }
     }
 
+    fun addCardToDeck(card: ScryfallDBCard) {
+        decklist.value = decklist.value + card
+    }
+
+    fun removeSingleInstanceOfCard(cardName: String) {
+        val updatedDecklist = decklist.value.toMutableList()
+        val cardToRemove = updatedDecklist.find { it.name == cardName } // Find one instance
+        if (cardToRemove != null) {
+            updatedDecklist.remove(cardToRemove)
+        }
+        decklist.value = updatedDecklist
+    }
+
+    var chatResponse by mutableStateOf("")
+        private set
+
+    fun updateChatResponse(newResponse: String) {
+        chatResponse = newResponse
+    }
 }
 

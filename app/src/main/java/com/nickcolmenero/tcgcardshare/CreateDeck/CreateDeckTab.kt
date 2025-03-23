@@ -1,0 +1,250 @@
+package com.nickcolmenero.tcgcardshare.CreateDeck
+
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CurrentDeckTab(
+    navController: NavController,
+    viewModel: CreateDeckListViewModel = viewModel(),
+    deckList: MutableState<String>,
+    selectedFormat: MutableState<String>
+) {
+    val currentUser = Firebase.auth.currentUser?.uid.orEmpty()
+    val firestore = Firebase.firestore
+    val decklistRef = firestore.collection("users").document(currentUser)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val deckSize = viewModel.decklist.value.size
+
+    val deckSizeMessage = when {
+        selectedFormat.value == "commander" || selectedFormat.value == "canadian highlander" -> {
+            if (deckSize != 100) "Deck must contain exactly 100 cards for ${selectedFormat.value}." else null
+        }
+
+        deckSize < 60 -> "Deck must contain at least 60 cards for ${selectedFormat.value}."
+        else -> null
+    }
+
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
+        item {
+            val formats = listOf(
+                "standard", "future", "historic", "timeless", "gladiator", "pioneer",
+                "explorer", "modern", "legacy", "pauper", "vintage", "penny",
+                "commander", "oathbreaker", "standardbrawl", "brawl", "alchemy",
+                "paupercommander", "duel", "oldschool", "premodern", "predh",
+                "canadian highlander"
+            )
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    value = selectedFormat.value,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Select Format") },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            contentDescription = "Dropdown Icon"
+                        )
+                    },
+                    modifier = Modifier.menuAnchor()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    formats.forEach { format ->
+                        DropdownMenuItem(
+                            text = { Text(format) },
+                            onClick = {
+                                selectedFormat.value = format
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                    viewModel.searchCard(it)
+                },
+                label = { Text("Search Card") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            viewModel.scryfallDBCard.value?.let { card ->
+                val legality = card.legalities
+                val isLegal = if (selectedFormat.value.isNotEmpty()) {
+                    legality[selectedFormat.value]?.let { it == "legal" }
+                        ?: false
+                } else {
+                    true
+                }
+                Card(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = card.name, fontWeight = FontWeight.Bold)
+                        Text(text = card.type_line)
+                        Text(text = "Mana Cost: ${card.mana_cost ?: "N/A"}")
+                        if (card.toughness != null) {
+                            Text(text = "Toughness: ${card.toughness}")
+                        }
+                        if (card.power != null) {
+                            Text(text = "Power: ${card.power}")
+                        }
+                        Text(text = "Rarity: ${card.rarity}")
+                        card.image_uris?.get("normal")?.let {
+                            Image(
+                                painter = rememberAsyncImagePainter(it),
+                                contentDescription = "Card Image",
+                                modifier = Modifier.size(600.dp)
+                            )
+                        }
+                        if (!isLegal) {
+                            Text(
+                                text = "This card is not legal in ${selectedFormat.value}.",
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                if (isLegal) {
+                                    viewModel.addCardToDeck(card)
+
+                                    val groupedDecklist =
+                                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                                    deckList.value =
+                                        groupedDecklist.entries.joinToString("\n") { (cardName, count) ->
+                                            "$cardName x$count"
+                                        }
+                                }
+                            },
+                            modifier = Modifier.padding(top = 8.dp),
+                            enabled = isLegal
+                        ) {
+                            Text("Add to Deck")
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
+        items(groupedDecklist.toList()) { (cardName, count) ->
+            Card(modifier = Modifier.padding(8.dp)) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "$cardName x$count", modifier = Modifier.weight(1f))
+                    IconButton(onClick = {
+                        viewModel.removeSingleInstanceOfCard(cardName)
+                        val updatedGroupedDecklist =
+                            viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                        deckList.value =
+                            updatedGroupedDecklist.entries.joinToString("\n") { (cardName, count) ->
+                                "$cardName x$count"
+                            }
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Remove Card")
+                    }
+                }
+            }
+        }
+        item{
+            Button(
+                onClick = {
+                    val groupedDecklist =
+                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                    val deckString = groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
+                        "$cardName x$count"
+                    }
+
+                    if (currentUser.isNotEmpty()) {
+                        val deckData = mapOf(
+                            "decklist" to deckString,
+                            "format" to selectedFormat.value
+                        )
+
+                        decklistRef.set(deckData)
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Decklist saved successfully to Firestore.")
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore", "Failed to save decklist: ${exception.message}")
+                            }
+                    } else {
+                        Log.e("Firestore", "User not authenticated.")
+                    }
+                },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Save Decklist")
+            }
+        }
+    }
+
+}

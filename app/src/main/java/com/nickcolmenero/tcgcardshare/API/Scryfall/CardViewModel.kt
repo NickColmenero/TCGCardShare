@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 class CardViewModel : ViewModel() {
     var scryfallDBCard = mutableStateOf<ScryfallDBCard?>(null)
     var error = mutableStateOf<String?>(null)
-    var decklist = mutableStateOf<List<ScryfallDBCard>>(emptyList())
 
     fun searchCard(cardName: String) {
         viewModelScope.launch {
@@ -28,13 +27,5 @@ class CardViewModel : ViewModel() {
                 scryfallDBCard.value = null
             }
         }
-    }
-
-    fun addCardToDeck(card: ScryfallDBCard) {
-        decklist.value = decklist.value + card
-    }
-
-    fun removeCardFromDeck(card: ScryfallDBCard) {
-        decklist.value = decklist.value.filterNot { it.name == card.name }
     }
 }
