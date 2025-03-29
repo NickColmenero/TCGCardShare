@@ -16,7 +16,7 @@ import com.nickcolmenero.tcgcardshare.homepage.Homepage
 import com.nickcolmenero.tcgcardshare.login.passwordreset.PasswordResetScreen
 import com.nickcolmenero.tcgcardshare.login.signin.SignInScreen
 import com.nickcolmenero.tcgcardshare.login.signup.SignUpScreen
-
+import com.nickcolmenero.tcgcardshare.viewDeck.ViewDeckList
 
 
 @Composable
@@ -56,6 +56,10 @@ fun MainApp() {
             }
             composable("AskAI") {
                 ChatScreen(navController)
+            }
+            composable("ViewDeckList")
+            {
+                ViewDeckList(navController)
             }
         }
     }

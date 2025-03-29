@@ -65,7 +65,9 @@ fun CreateDeckList(navController: NavController, viewModel: CreateDeckListViewMo
                 var selectedTabIndex by remember { mutableStateOf(0) }
                 val deckList = remember { mutableStateOf("") } // Shared state for the decklist
                 val selectedDeckFormat =
-                    remember { mutableStateOf("") } // Shared state for the format
+                    remember { mutableStateOf("") }
+                val deckName =
+                    remember { mutableStateOf("") }
                 TabRow(selectedTabIndex = selectedTabIndex) {
                     listOf("Current Deck", "Suggestions").forEachIndexed { index, title ->
                         Tab(
@@ -80,6 +82,7 @@ fun CreateDeckList(navController: NavController, viewModel: CreateDeckListViewMo
                     0 -> CurrentDeckTab(
                         navController,
                         viewModel,
+                        deckName,
                         deckList,
                         selectedDeckFormat
                     ) // Pass format to Tab 0

@@ -34,14 +34,6 @@ class SignUpViewModel @Inject constructor() : ViewModel() {
                                         id = user.uid,
                                         username = name
                                     )
-                                    db.collection("users").document(user.uid)
-                                        .set(userData)
-                                        .addOnSuccessListener {
-                                            _state.value = SignUpState.Success
-                                        }
-                                        .addOnFailureListener {
-                                            _state.value = SignUpState.Error(it.message ?: "Unknown error")
-                                        }
                                 } else {
                                     _state.value = SignUpState.Error("Profile update failed")
                                 }
