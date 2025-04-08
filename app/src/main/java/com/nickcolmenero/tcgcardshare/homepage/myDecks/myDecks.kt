@@ -18,7 +18,6 @@ import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
 fun MyDecks(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
-    val deckOwnerID = Firebase.auth.currentUser?.uid.orEmpty().take(8)
     var deckList by remember { mutableStateOf(listOf<DeckViewerModel>()) }
 
     LaunchedEffect(Unit) {
@@ -37,7 +36,7 @@ fun MyDecks(navController: NavController) {
                 }
             }
     }
-    DeckList(deckList = deckList,navController, deckOwnerID)
+    DeckList(deckList = deckList,navController, currentUser)
 }
 
 

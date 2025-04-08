@@ -19,6 +19,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
+
 @Composable
 fun ViewDeckListTab(
     navController: NavController,

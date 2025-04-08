@@ -62,7 +62,7 @@ fun MainApp() {
                 ViewDeckList(
                     navController,
                     BackStackEntry.arguments?.getString("deckOwnerID") ?: "",
-                    BackStackEntry.arguments?.getString("decksID") ?: ""
+                    BackStackEntry.arguments?.getString("decklistID") ?: ""
                 )
             }
         }
