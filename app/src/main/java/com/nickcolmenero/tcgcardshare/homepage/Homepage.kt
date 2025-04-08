@@ -27,8 +27,8 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.ShareDeck.QuickSearch
 import com.nickcolmenero.tcgcardshare.homepage.myDecks.MyDecks
-import com.nickcolmenero.tcgcardshare.homepage.news.news
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +86,7 @@ fun Homepage(navController: NavController) {
                         ) {
                             var selectedTabIndex by remember { mutableStateOf(0) }
                             TabRow(selectedTabIndex = selectedTabIndex) {
-                                listOf("My Decks", "News").forEachIndexed { index, title ->
+                                listOf("My Decks", "Quick search").forEachIndexed { index, title ->
                                     Tab(
                                         text = { Text(title) },
                                         selected = selectedTabIndex == index,
@@ -96,7 +96,7 @@ fun Homepage(navController: NavController) {
                             }
                             when (selectedTabIndex) {
                                 0 -> MyDecks(navController) // Pass format to Tab 0
-                                1 -> news(navController)// Pass format to Tab 1
+                                1 -> QuickSearch(navController)// Pass format to Tab 1
                             }
                         }
                     }

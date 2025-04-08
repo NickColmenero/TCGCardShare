@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.nickcolmenero.tcgcardshare.API.AI.ChatScreen
 import com.nickcolmenero.tcgcardshare.CreateDeck.CreateDeckList
 import com.nickcolmenero.tcgcardshare.SeachCards.CardSearchScreen
+import com.nickcolmenero.tcgcardshare.ShareDeck.ShareDeckSearch
 import com.nickcolmenero.tcgcardshare.homepage.Homepage
 import com.nickcolmenero.tcgcardshare.login.passwordreset.PasswordResetScreen
 import com.nickcolmenero.tcgcardshare.login.signin.SignInScreen
@@ -64,6 +65,10 @@ fun MainApp() {
                     BackStackEntry.arguments?.getString("deckOwnerID") ?: "",
                     BackStackEntry.arguments?.getString("decklistID") ?: ""
                 )
+            }
+            composable("ShareDeckSearch")
+            {
+                ShareDeckSearch(navController)
             }
         }
     }
