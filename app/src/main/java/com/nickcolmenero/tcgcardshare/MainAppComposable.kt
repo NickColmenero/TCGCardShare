@@ -57,9 +57,13 @@ fun MainApp() {
             composable("AskAI") {
                 ChatScreen(navController)
             }
-            composable("ViewDeckList")
-            {
-                ViewDeckList(navController)
+            composable("ViewDeckList/{deckOwnerID}/{decklistID}")
+            { BackStackEntry ->
+                ViewDeckList(
+                    navController,
+                    BackStackEntry.arguments?.getString("deckOwnerID") ?: "",
+                    BackStackEntry.arguments?.getString("decksID") ?: ""
+                )
             }
         }
     }

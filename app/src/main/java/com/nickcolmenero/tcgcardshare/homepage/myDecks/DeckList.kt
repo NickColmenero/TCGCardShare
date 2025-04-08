@@ -7,10 +7,10 @@ import androidx.navigation.NavController
 import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
 
 @Composable
-fun DeckList(deckList: List<DeckViewerModel> , navController: NavController) {
+fun DeckList(deckList: List<DeckViewerModel> , navController: NavController, deckOwnerID: String) {
     LazyColumn {
         items(deckList) { deck ->
-            DeckItem(deck = deck,navController)
+            DeckItem(deck = deck,navController,deckOwnerID)
         }
     }
 }

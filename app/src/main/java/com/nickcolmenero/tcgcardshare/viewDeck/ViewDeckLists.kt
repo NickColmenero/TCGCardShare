@@ -24,14 +24,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
 import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewDeckList(navController: NavController) {
+fun ViewDeckList(navController: NavController, deckOwnerID:String, decklistID:String) {
+    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
+    val firestore = Firebase.firestore
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var deckList by remember { mutableStateOf(listOf<DeckViewerModel>()) }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -61,7 +70,7 @@ fun ViewDeckList(navController: NavController) {
                     .padding(paddingValues)
             ) {
                 var selectedTabIndex by remember { mutableStateOf(0) }
-                val deckList = remember { mutableStateOf("") }
+
                 val selectedDeckFormat =
                     remember { mutableStateOf("") }
                 TabRow(selectedTabIndex = selectedTabIndex) {
@@ -73,10 +82,13 @@ fun ViewDeckList(navController: NavController) {
                         )
                     }
                 }
-                /*when (selectedTabIndex) {
-                    0 ->
-                    1 ->
-                }*/
+                when (selectedTabIndex) {
+                    0 ->ViewDeckListTab(
+                            navController,
+                            deckOwnerID,
+                            decklistID)
+                    1 -> ShareDeckListTab()
+                }
             }
         }
     }

@@ -21,11 +21,12 @@ import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeckItem(deck: DeckViewerModel,navController: NavController) {
+fun DeckItem(deck: DeckViewerModel,navController: NavController,deckOwnerID:String,) {
+    val decklistID = deck.id.toString()
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("ViewDeckList") }
+            .clickable { navController.navigate("ViewDeckList/{deckOwnerID}/{decklistID}") }
             .padding(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {

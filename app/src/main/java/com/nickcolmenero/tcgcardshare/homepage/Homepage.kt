@@ -24,6 +24,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.homepage.myDecks.MyDecks
 import com.nickcolmenero.tcgcardshare.homepage.news.news
@@ -34,6 +36,8 @@ import kotlinx.coroutines.launch
 fun Homepage(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -63,10 +67,10 @@ fun Homepage(navController: NavController) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+                Text(" Your userID is: ${currentUser}")
 
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 rememberCoroutineScope()
-
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
