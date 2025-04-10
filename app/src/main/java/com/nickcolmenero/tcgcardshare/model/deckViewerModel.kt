@@ -11,8 +11,4 @@ data class DeckViewerModel(
     val deckName:String = "",
     val deckFormat: String = "",
     val rawCards: String = ""
-) {
-    fun getParsedCards(): List<String> {
-        return rawCards.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-    }
-}
+)

@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateDeckList(navController: NavController, viewModel: CreateDeckListViewModel = viewModel()) {
+fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = viewModel()) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 

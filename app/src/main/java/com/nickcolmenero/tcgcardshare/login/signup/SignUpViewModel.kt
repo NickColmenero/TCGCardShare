@@ -18,7 +18,6 @@ class SignUpViewModel @Inject constructor() : ViewModel() {
     fun signUp(name: String, email: String, password: String) {
         _state.value = SignUpState.Loading
         val auth = FirebaseAuth.getInstance()
-
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {

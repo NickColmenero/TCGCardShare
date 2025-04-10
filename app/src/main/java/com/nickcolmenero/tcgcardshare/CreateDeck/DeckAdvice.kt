@@ -26,7 +26,7 @@ fun AIDeckHelp(
     navController: NavController,
     deckList: MutableState<String>,
     selectedDeckFormat: MutableState<String>,
-    viewModel: CreateDeckListViewModel = viewModel()
+    viewModel: DeckListViewModel = viewModel()
 ) {
     val apiService = remember { createChatGptService() }
     var userInput by remember { mutableStateOf(TextFieldValue()) }

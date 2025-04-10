@@ -28,7 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -53,7 +52,7 @@ import java.util.UUID
 @Composable
 fun CurrentDeckTab(
     navController: NavController,
-    viewModel: CreateDeckListViewModel = viewModel(),
+    viewModel: DeckListViewModel = viewModel(),
     deckName:MutableState<String>,
     deckList: MutableState<String>,
     selectedFormat: MutableState<String>

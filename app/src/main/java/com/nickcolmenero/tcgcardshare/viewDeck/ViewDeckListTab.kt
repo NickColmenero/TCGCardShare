@@ -1,84 +1,78 @@
 package com.nickcolmenero.tcgcardshare.viewDeck
 // THIS IS WHAT I AM CURRENTLY WORKIN ON!
-import android.util.Log
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DrawerValue
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
+import com.nickcolmenero.tcgcardshare.CreateDeck.DeckListViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewDeckListTab(
     navController: NavController,
     deckOwnerID: String,
     decklistID: String,
+    deckListToItems: String,
+    viewModel: DeckListViewModel = viewModel()
 ) {
-    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
-    val db = FirebaseFirestore.getInstance()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    var deckList by remember { mutableStateOf(listOf<DeckViewerModel>()) }
-    var isLoading by remember { mutableStateOf(true) }
-
-    Log.d("Debug", "deckOwnerID: ${deckOwnerID}")
-    Log.d("Debug", "decklistID: ${decklistID}")
-
-    if (deckOwnerID.isNotEmpty() && decklistID.isNotEmpty()) {
-        val docRef = db.collection("users")
-            .document(deckOwnerID)
-            .collection("decks")
-            .document(decklistID)
-
-        Log.d("Firestore", "Fetching data from: ${docRef.path}")
-
-        LaunchedEffect(decklistID) {
-            docRef.get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        val deck = DeckViewerModel(
-                            id = document.id,
-                            deckName = document.getString("DeckName") ?: "",
-                            deckFormat = document.getString("format") ?: "",
-                            rawCards = document.getString("decklist") ?: ""
-                        )
-                        deckList = listOf(deck)
-                        isLoading = false
-                        Log.e("firebase", "Data was loaded: $deck")
-                    } else {
-                        Log.e("firebase", "Document does not exist!")
-                        isLoading = false
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("firebase", "Error retrieving document: ${exception.message}")
-                    isLoading = false
-                }
+    data class CardItem(val name: String, val count: Int)
+    fun parseCardItems(deckListToItems: String): List<CardItem> {
+        val rawItems = deckListToItems.split(",").map { it.trim() }
+        return rawItems.mapNotNull {
+            val parts = it.split(" x")
+            if (parts.size == 2) {
+                val name = parts[0].trim()
+                val count = parts[1].toIntOrNull()
+                count?.let { CardItem(name, it) }
+            } else {
+                null
+            }
         }
-    } else {
-        Log.e("firebase", "Invalid deckOwnerID or decklistID. Cannot fetch data.")
     }
-    //cosmetic front end stuff deal with after backend works.
-    if (isLoading) {
-        CircularProgressIndicator()
-    } else {
-        Column {
-            deckList.forEach { deck ->
-                Text(text = "Deck Name: ${deck.deckName}")
-                Text(text = "Deck Format: ${deck.deckFormat}")
+
+    val cardItems = parseCardItems(deckListToItems)
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        items(cardItems) { cardItem ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clip(MaterialTheme.shapes.medium),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = cardItem.name,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = "x ${cardItem.count}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }
