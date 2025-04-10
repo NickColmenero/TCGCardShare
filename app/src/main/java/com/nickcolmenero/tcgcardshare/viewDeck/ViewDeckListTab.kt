@@ -30,19 +30,21 @@ fun ViewDeckListTab(
     viewModel: DeckListViewModel = viewModel()
 ) {
     data class CardItem(val name: String, val count: Int)
+
     fun parseCardItems(deckListToItems: String): List<CardItem> {
-        val rawItems = deckListToItems.split(",").map { it.trim() }
+        val rawItems = deckListToItems.removePrefix("[").removeSuffix("]").split(",").map { it.trim() }
         return rawItems.mapNotNull {
-            val parts = it.split(" x")
-            if (parts.size == 2) {
-                val name = parts[0].trim()
-                val count = parts[1].toIntOrNull()
+            val lastIndex = it.lastIndexOf(" x") // Find the LAST occurrence
+            if (lastIndex != -1) {
+                val name = it.substring(0, lastIndex).trim()
+                val count = it.substring(lastIndex + 2).toIntOrNull()
                 count?.let { CardItem(name, it) }
             } else {
                 null
             }
         }
     }
+
 
     val cardItems = parseCardItems(deckListToItems)
     LazyColumn(
@@ -65,12 +67,8 @@ fun ViewDeckListTab(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = cardItem.name,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Text(
-                        text = "x ${cardItem.count}",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = "${cardItem.name}, x ${cardItem.count}",
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }

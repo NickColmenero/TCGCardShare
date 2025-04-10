@@ -53,7 +53,7 @@ import java.util.UUID
 fun CurrentDeckTab(
     navController: NavController,
     viewModel: DeckListViewModel = viewModel(),
-    deckName:MutableState<String>,
+    deckName: MutableState<String>,
     deckList: MutableState<String>,
     selectedFormat: MutableState<String>
 ) {
@@ -165,16 +165,34 @@ fun CurrentDeckTab(
                 }
                 Card(modifier = Modifier.padding(8.dp)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = card.name, fontWeight = FontWeight.Bold)
-                        Text(text = card.type_line)
-                        Text(text = "Mana Cost: ${card.mana_cost ?: "N/A"}")
+                        Text(
+                            text = card.name, fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = card.type_line,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = "Mana Cost: ${card.mana_cost ?: "N/A"}",
+                            style = MaterialTheme.typography.labelMedium
+                        )
                         if (card.toughness != null) {
-                            Text(text = "Toughness: ${card.toughness}")
+                            Text(
+                                text = "Toughness: ${card.toughness}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                         if (card.power != null) {
-                            Text(text = "Power: ${card.power}")
+                            Text(
+                                text = "Power: ${card.power}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
-                        Text(text = "Rarity: ${card.rarity}")
+                        Text(
+                            text = "Rarity: ${card.rarity}",
+                            style = MaterialTheme.typography.labelMedium
+                        )
                         card.image_uris?.get("normal")?.let {
                             Image(
                                 painter = rememberAsyncImagePainter(it),
@@ -228,12 +246,13 @@ fun CurrentDeckTab(
 
         val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
         items(groupedDecklist.toList()) { (cardName, count) ->
-            Card(modifier = Modifier.padding(8.dp)) {
+            Card(modifier = Modifier.padding(2.dp)) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "$cardName x$count", modifier = Modifier.weight(1f))
+                    Text(text = "$cardName x$count", modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.labelLarge)
                     IconButton(onClick = {
                         viewModel.removeSingleInstanceOfCard(cardName)
                         val updatedGroupedDecklist =
@@ -256,7 +275,7 @@ fun CurrentDeckTab(
                             viewModel.decklist.value.groupingBy { it.name }.eachCount()
                         val deckString =
                             groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
-                                "$cardName x$count"
+                                "[$cardName x$count]"
                             }
 
                         if (currentUser.isNotEmpty()) {
