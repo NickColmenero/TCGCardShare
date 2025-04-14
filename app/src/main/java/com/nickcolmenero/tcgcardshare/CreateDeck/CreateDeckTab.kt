@@ -2,6 +2,7 @@ package com.nickcolmenero.tcgcardshare.CreateDeck
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,9 +25,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,22 +45,31 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrentDeckTab(
     navController: NavController,
-    viewModel: CreateDeckListViewModel = viewModel(),
+    viewModel: DeckListViewModel = viewModel(),
+    deckName: MutableState<String>,
     deckList: MutableState<String>,
     selectedFormat: MutableState<String>
 ) {
-    val currentUser = Firebase.auth.currentUser?.uid.orEmpty()
+    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
     val firestore = Firebase.firestore
-    val decklistRef = firestore.collection("users").document(currentUser)
+    val uniqueDeckID = UUID.randomUUID().toString().replace("-", "").take(5)
+    val decklistRef = firestore
+        .collection("users")
+        .document(currentUser)
+        .collection("decks")
+        .document(uniqueDeckID)
     var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val deckSize = viewModel.decklist.value.size
+    var showSnackbar by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val deckSizeMessage = when {
         selectedFormat.value == "commander" || selectedFormat.value == "canadian highlander" -> {
@@ -75,6 +87,8 @@ fun CurrentDeckTab(
 
     ) {
         item {
+            Spacer(modifier = Modifier.padding(16.dp))
+
             val formats = listOf(
                 "standard", "future", "historic", "timeless", "gladiator", "pioneer",
                 "explorer", "modern", "legacy", "pauper", "vintage", "penny",
@@ -82,40 +96,55 @@ fun CurrentDeckTab(
                 "paupercommander", "duel", "oldschool", "premodern", "predh",
                 "canadian highlander"
             )
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(
-                    value = selectedFormat.value,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Select Format") },
-                    trailingIcon = {
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            contentDescription = "Dropdown Icon"
-                        )
-                    },
-                    modifier = Modifier.menuAnchor() // NEEDED FOR FORMATS TO DISPLAY!
+                OutlinedTextField(
+                    value = deckName.value,
+                    onValueChange = { deckName.value = it }, label = { Text("Deck Name") },
+                    modifier = Modifier.weight(1f)
                 )
-
-                ExposedDropdownMenu(
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.weight(1f)
                 ) {
-                    formats.forEach { format ->
-                        DropdownMenuItem(
-                            text = { Text(format) },
-                            onClick = {
-                                selectedFormat.value = format
-                                expanded = false
-                            }
-                        )
+                    OutlinedTextField(
+                        value = selectedFormat.value,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Select Format") },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown Icon"
+                            )
+                        },
+                        modifier = Modifier
+                            .menuAnchor() // Need this here otherwise it doesn't expand due to number of formats **MAKE SURE ANDROID STUDIO DOESN'T ADD ANYTHING TO PARAMETERS WHEN AUTO FORMATING**.
+                            .align(Alignment.CenterVertically)
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        formats.forEach { format ->
+                            DropdownMenuItem(
+                                text = { Text(format) },
+                                onClick = {
+                                    selectedFormat.value = format
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }
+
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = {
@@ -123,7 +152,6 @@ fun CurrentDeckTab(
                     viewModel.searchCard(it)
                 },
                 label = { Text("Search Card") },
-                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -137,21 +165,39 @@ fun CurrentDeckTab(
                 }
                 Card(modifier = Modifier.padding(8.dp)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = card.name, fontWeight = FontWeight.Bold)
-                        Text(text = card.type_line)
-                        Text(text = "Mana Cost: ${card.mana_cost ?: "N/A"}")
+                        Text(
+                            text = card.name, fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = card.type_line,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = "Mana Cost: ${card.mana_cost ?: "N/A"}",
+                            style = MaterialTheme.typography.labelMedium
+                        )
                         if (card.toughness != null) {
-                            Text(text = "Toughness: ${card.toughness}")
+                            Text(
+                                text = "Toughness: ${card.toughness}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                         if (card.power != null) {
-                            Text(text = "Power: ${card.power}")
+                            Text(
+                                text = "Power: ${card.power}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
-                        Text(text = "Rarity: ${card.rarity}")
+                        Text(
+                            text = "Rarity: ${card.rarity}",
+                            style = MaterialTheme.typography.labelMedium
+                        )
                         card.image_uris?.get("normal")?.let {
                             Image(
                                 painter = rememberAsyncImagePainter(it),
                                 contentDescription = "Card Image",
-                                modifier = Modifier.size(600.dp)
+                                modifier = Modifier.size(350.dp)
                             )
                         }
                         if (!isLegal) {
@@ -161,40 +207,52 @@ fun CurrentDeckTab(
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-
-                        Button(
-                            onClick = {
-                                if (isLegal) {
-                                    viewModel.addCardToDeck(card)
-
-                                    val groupedDecklist =
-                                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                                    deckList.value =
-                                        groupedDecklist.entries.joinToString("\n") { (cardName, count) ->
-                                            "$cardName x$count"
-                                        }
+                        Column {
+                            Button(
+                                onClick = {
+                                    if (isLegal) {
+                                        viewModel.addCardToDeck(card)
+                                        val groupedDecklist =
+                                            viewModel.decklist.value.groupingBy { it.name }
+                                                .eachCount()
+                                        deckList.value =
+                                            groupedDecklist.entries.joinToString("\n") { (cardName, count) ->
+                                                "$cardName x$count"
+                                            }
+                                        showSnackbar = true
+                                    }
+                                },
+                                modifier = Modifier.padding(top = 8.dp),
+                                enabled = isLegal
+                            ) {
+                                Text("Add to Deck")
+                            }
+                            SnackbarHost(
+                                hostState = snackbarHostState,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                            if (showSnackbar) {
+                                LaunchedEffect(snackbarHostState) {
+                                    snackbarHostState.showSnackbar("Card added successfully!")
+                                    showSnackbar = false
                                 }
-                            },
-                            modifier = Modifier.padding(top = 8.dp),
-                            enabled = isLegal
-                        ) {
-                            Text("Add to Deck")
+                            }
                         }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
 
         val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
         items(groupedDecklist.toList()) { (cardName, count) ->
-            Card(modifier = Modifier.padding(8.dp)) {
+            Card(modifier = Modifier.padding(2.dp)) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "$cardName x$count", modifier = Modifier.weight(1f))
+                    Text(text = "$cardName x$count", modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.labelLarge)
                     IconButton(onClick = {
                         viewModel.removeSingleInstanceOfCard(cardName)
                         val updatedGroupedDecklist =
@@ -209,37 +267,46 @@ fun CurrentDeckTab(
                 }
             }
         }
-        item{
-            Button(
-                onClick = {
-                    val groupedDecklist =
-                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                    val deckString = groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
-                        "$cardName x$count"
-                    }
-
-                    if (currentUser.isNotEmpty()) {
-                        val deckData = mapOf(
-                            "decklist" to deckString,
-                            "format" to selectedFormat.value
-                        )
-
-                        decklistRef.set(deckData)
-                            .addOnSuccessListener {
-                                Log.d("Firestore", "Decklist saved successfully to Firestore.")
+        item {
+            if (deckName != null) {
+                Button(
+                    onClick = {
+                        val groupedDecklist =
+                            viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                        val deckString =
+                            groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
+                                "[$cardName x$count]"
                             }
-                            .addOnFailureListener { exception ->
-                                Log.e("Firestore", "Failed to save decklist: ${exception.message}")
-                            }
-                    } else {
-                        Log.e("Firestore", "User not authenticated.")
-                    }
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Save Decklist")
+
+                        if (currentUser.isNotEmpty()) {
+                            val deckData = mapOf(
+                                "DeckName" to deckName.value,
+                                "decklist" to deckString,
+                                "format" to selectedFormat.value,
+                                "deckID" to uniqueDeckID
+                            )
+
+                            decklistRef.set(deckData)
+                                .addOnSuccessListener {
+                                    Log.d("Firestore", "Decklist saved successfully to Firestore.")
+                                }
+                                .addOnFailureListener { exception ->
+                                    Log.e(
+                                        "Firestore",
+                                        "Failed to save decklist: ${exception.message}"
+                                    )
+                                }
+                        } else {
+                            Log.e("Firestore", "User not authenticated.")
+                        }
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Save Decklist")
+                }
+            } else {
+                Text("Please enter a deck name.")
             }
         }
     }
-
 }

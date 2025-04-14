@@ -24,21 +24,29 @@ fun NavigationDrawerContent(navController: NavController) {
             .fillMaxWidth(.5F)
             .padding(16.dp)
     ) {
-
         Text(text = "Navigation", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
-        TextButton(modifier = Modifier.fillMaxWidth(),onClick = { navController.navigate("home") }) {
+
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("home") }) {
             Text("Home")
         }
-
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CardSearchScreen") }) {
-            Text("Search for cards")
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("ShareDeckSearch") }) {
+            Text("Search for a deck")
         }
         TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CreateDeckList") }) {
             Text("Create a decklist")
         }
         TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("AskAI") }) {
             Text("Ask AI")
+        }
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CardSearchScreen") }) {
+            Text("Search for cards")
+        }
+
+        Spacer(modifier = Modifier.weight(.5f))
+
+        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { /* Handle logout logic here */ }) {
+            Text("Logout")
         }
     }
 }

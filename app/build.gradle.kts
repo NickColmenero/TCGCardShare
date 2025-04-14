@@ -91,5 +91,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
     implementation(platform(libs.firebase.bom))
-
+    implementation (libs.core)
+    implementation (libs.zxing.android.embedded)
 }

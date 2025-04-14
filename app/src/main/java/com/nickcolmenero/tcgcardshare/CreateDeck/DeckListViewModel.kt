@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.FirebaseFirestore
 import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
 import com.nickcolmenero.tcgcardshare.API.Scryfall.RetrofitInstance
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,8 +17,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class CreateDeckListViewModel @Inject constructor() : ViewModel() {
-    private val db = FirebaseFirestore.getInstance()
+class DeckListViewModel @Inject constructor() : ViewModel() {
     var scryfallDBCard = mutableStateOf<ScryfallDBCard?>(null)
     val decklist = mutableStateOf<List<ScryfallDBCard>>(emptyList()) // Maintain decklist here
     var error = mutableStateOf<String?>(null)

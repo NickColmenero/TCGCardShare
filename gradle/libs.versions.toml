@@ -2,6 +2,7 @@
 agp = "8.7.3"
 coilComposeVersion = "2.1.0"
 converterGson = "2.9.0"
+core = "3.4.1"
 firebaseBom = "33.7.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -44,6 +45,7 @@ roomRuntime = "2.6.1"
 roomRuntimeVersion = "2.4.2"
 runtimeLivedata = "1.7.6"
 ui = "1.0.0"
+zxingAndroidEmbedded = "4.2.0"
 
 
 [libraries]
@@ -58,6 +60,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-runtime-v242 = { module = "androidx.room:room-runtime", version.ref = "roomRuntimeVersion" }
 coil-compose-v210 = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -98,6 +101,7 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 
 
 
