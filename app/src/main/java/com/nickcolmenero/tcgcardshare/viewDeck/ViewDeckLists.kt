@@ -36,8 +36,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewDeckList(navController: NavController, deckOwnerID:String, decklistID:String) {
-    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
+fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: String) {
+    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8) // for comparison in the future to allow users to edit decklists.
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val db = FirebaseFirestore.getInstance()
@@ -68,10 +68,10 @@ fun ViewDeckList(navController: NavController, deckOwnerID:String, decklistID:St
                             rawCards = document.getString("decklist") ?: ""
                         )
                         deckName = deck.deckName
-                        Log.e("Deck name","$deckName IS the name")
+                        Log.e("Deck name", "$deckName IS the name")
                         deckInfo = listOf(deck)
                         deckListToItems = deck.rawCards
-                        Log.e("deckListToItems","The imported decklist is: ${deckListToItems}")
+                        Log.e("deckListToItems", "The imported decklist is: ${deckListToItems}")
 
                         isLoading = false
                         Log.e("firebase", "Data was loaded: $deck")
@@ -128,11 +128,11 @@ fun ViewDeckList(navController: NavController, deckOwnerID:String, decklistID:St
                     }
                 }
                 when (selectedTabIndex) {
-                    0 ->ViewDeckListTab(
-                            navController,
-                            deckOwnerID,
-                            decklistID,deckListToItems)
-                    1 -> ShareDeckListTab()
+                    0 -> ViewDeckListTab(
+                        navController, deckOwnerID, decklistID, deckListToItems
+                    )
+
+                    1 -> ShareDeckListTab(navController, deckOwnerID, decklistID)
                 }
             }
         }

@@ -23,11 +23,11 @@ import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
 @Composable
 fun DeckItem(deck: DeckViewerModel,navController: NavController,deckOwnerID:String,) {
     val deckOwnerID = deckOwnerID
-    val decklistID = deck.id
+    val deckListID = deck.id
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("ViewDeckList/${deckOwnerID}/${decklistID}") }
+            .clickable { navController.navigate("ViewDeckList/${deckOwnerID}/${deckListID}") }
             .padding(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
