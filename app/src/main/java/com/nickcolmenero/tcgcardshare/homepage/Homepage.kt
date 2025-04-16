@@ -67,9 +67,7 @@ fun Homepage(navController: NavController) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                Text(" Your userID is: ${currentUser}")
-
-                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                rememberDrawerState(initialValue = DrawerValue.Closed)
                 rememberCoroutineScope()
                 Scaffold(
                 ) { paddingValues ->

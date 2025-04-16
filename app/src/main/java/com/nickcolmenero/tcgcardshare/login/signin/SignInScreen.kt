@@ -2,7 +2,6 @@ package com.nickcolmenero.tcgcardshare.login.signin
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -37,24 +35,25 @@ import com.nickcolmenero.tcgcardshare.R
 
 @Composable
 fun SignInScreen(navController: NavController) {
-    val viewModel:SignInViewModel = hiltViewModel()
+    val viewModel: SignInViewModel = hiltViewModel()
     val uiState = viewModel.state.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     LaunchedEffect(key1 = uiState.value) {
-        when(uiState.value) {
+        when (uiState.value) {
             is SignInState.Success -> {
                 navController.navigate("home")
             }
+
             is SignInState.Error -> {
                 Toast.makeText(context, "Sign In failed", Toast.LENGTH_SHORT).show()
             }
+
             else -> {}
         }
     }
-
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -65,15 +64,13 @@ fun SignInScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(it)
                 .padding(16.dp)
-                .background(Color.White)
 
         ) {
             Image(
                 painter = painterResource(R.drawable.tcgcardsharelogo),
-                contentDescription = null,
+                contentDescription = "The logo for TCGCardShare",
                 modifier = Modifier
                     .size(200.dp)
-                    .background(Color.White)
             )
             OutlinedTextField(
                 value = email,
@@ -92,7 +89,8 @@ fun SignInScreen(navController: NavController) {
             )
             Spacer(
                 modifier = Modifier
-                    .size(16.dp))
+                    .size(16.dp)
+            )
             if (uiState.value == SignInState.Loading) {
                 CircularProgressIndicator()
             } else {

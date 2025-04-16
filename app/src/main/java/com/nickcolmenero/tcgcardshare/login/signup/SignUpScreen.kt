@@ -36,19 +36,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.nickcolmenero.tcgcardshare.R
 
-
-@Preview(showBackground = true)
-@Composable
-fun SignUpScreenPreview() {
-    val navController = rememberNavController()
-    SignUpScreen(navController = navController)
-}
-
 @Composable
 fun SignUpScreen(navController: NavController) {
     val viewModel: SignUpViewModel = hiltViewModel()
     val uiState = viewModel.state.collectAsState()
-    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -77,22 +68,12 @@ fun SignUpScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(it)
                 .padding(16.dp)
-                .background(Color.White)
-
         ) {
             Image(
                 painter = painterResource(R.drawable.tcgcardsharelogo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(200.dp)
-                    .background(Color.White)
-            )
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text(text = "Username") },
-                modifier = Modifier
-                    .fillMaxWidth()
             )
             OutlinedTextField(
                 value = email,
@@ -126,8 +107,8 @@ fun SignUpScreen(navController: NavController) {
                 CircularProgressIndicator()
             } else {
                 Button(
-                    onClick = { viewModel.signUp(name, email, password) },
-                    enabled = name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword,
+                    onClick = { viewModel.signUp(email, password) },
+                    enabled = email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword,
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {

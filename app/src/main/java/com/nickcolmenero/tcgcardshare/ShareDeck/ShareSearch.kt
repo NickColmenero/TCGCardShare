@@ -46,7 +46,7 @@ fun ShareDeckSearch(navController: NavController) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Home") },
+                    title = { Text("Search for a deck") },
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch { drawerState.open() }
@@ -65,8 +65,6 @@ fun ShareDeckSearch(navController: NavController) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                Text(" Your userID is: ${currentUser}")
-
                 Scaffold(
                 ) { paddingValues ->
                     Column(
