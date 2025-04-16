@@ -1,23 +1,31 @@
 package com.nickcolmenero.tcgcardshare.viewDeck
-// THIS IS WHAT I AM CURRENTLY WORKIN ON!
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.nickcolmenero.tcgcardshare.CreateDeck.DeckListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,9 +40,9 @@ fun ViewDeckListTab(
     data class CardItem(val name: String, val count: Int)
 
     fun parseCardItems(deckListToItems: String): List<CardItem> {
-        val rawItems = deckListToItems.removePrefix("[").removeSuffix("]").split(",").map { it.trim() }
+        val rawItems = deckListToItems.removePrefix("[").removeSuffix("]").split("], [").map { it.trim() }
         return rawItems.mapNotNull {
-            val lastIndex = it.lastIndexOf(" x") // Find the LAST occurrence
+            val lastIndex = it.lastIndexOf(" x")
             if (lastIndex != -1) {
                 val name = it.substring(0, lastIndex).trim()
                 val count = it.substring(lastIndex + 2).toIntOrNull()
@@ -45,8 +53,26 @@ fun ViewDeckListTab(
         }
     }
 
-
     val cardItems = parseCardItems(deckListToItems)
+
+    val cardImages = remember { mutableStateMapOf<String, String>() }
+
+    LaunchedEffect(cardItems) {
+        cardItems.forEach { cardItem ->
+            if (!cardImages.contains(cardItem.name)) {
+                viewModel.searchCard(cardItem.name)
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel.scryfallDBCard.value) {
+        viewModel.scryfallDBCard.value?.let { fetchedCard ->
+            fetchedCard.image_uris?.get("normal")?.let { imageUrl ->
+                cardImages[fetchedCard.name] = imageUrl
+            }
+        }
+    }
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -54,22 +80,41 @@ fun ViewDeckListTab(
             .padding(8.dp)
     ) {
         items(cardItems) { cardItem ->
-            Card(
+            val cardImageUrl = cardImages[cardItem.name]
+
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(8.dp)
-                    .clip(MaterialTheme.shapes.medium),
-                elevation = CardDefaults.cardElevation(4.dp)
+                    .fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "${cardItem.name}, x ${cardItem.count}",
-                        style = MaterialTheme.typography.labelMedium
+                cardImageUrl?.let { url ->
+                    Image(
+                        painter = rememberAsyncImagePainter(url),
+                        contentDescription = "Card Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .align(Alignment.CenterStart)
                     )
+                }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 110.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "${cardItem.name} x ${cardItem.count}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
