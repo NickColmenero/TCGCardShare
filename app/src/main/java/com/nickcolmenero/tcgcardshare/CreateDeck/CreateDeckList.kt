@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,13 +86,13 @@ fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = 
                         deckName,
                         deckList,
                         selectedDeckFormat
-                    ) // Pass format to Tab 0
+                    )
                     1 -> AIDeckHelp(
                         navController,
                         deckList,
                         selectedDeckFormat,
                         viewModel
-                    ) // Pass format to Tab 1
+                    )
                 }
             }
         }

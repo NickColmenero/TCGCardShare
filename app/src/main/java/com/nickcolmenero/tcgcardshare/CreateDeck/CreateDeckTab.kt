@@ -1,7 +1,12 @@
 package com.nickcolmenero.tcgcardshare.CreateDeck
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -43,14 +50,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import java.util.UUID
 
 
@@ -76,7 +87,7 @@ fun CurrentDeckTab(
     val deckSize = viewModel.decklist.value.size
     var showSnackbar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-
+    var showDialog by remember { mutableStateOf(false) }
     val deckSizeMessage = when {
         selectedFormat.value == "commander" || selectedFormat.value == "canadian highlander" -> {
             if (deckSize != 100) "Deck must contain exactly 100 cards for ${selectedFormat.value}." else null
@@ -146,17 +157,12 @@ fun CurrentDeckTab(
                     }
                 }
             }
-
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    viewModel.searchCard(it)
-                },
-                label = { Text("Search Card") },
-            )
+            Row() {
+                SnackbarHost(
+                    hostState = snackbarHostState
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
-
             viewModel.scryfallDBCard.value?.let { card ->
                 val legality = card.legalities
                 val isLegal = if (selectedFormat.value.isNotEmpty()) {
@@ -165,8 +171,15 @@ fun CurrentDeckTab(
                 } else {
                     true
                 }
-                Card(modifier = Modifier.padding(8.dp)) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                Card(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .border(1.dp, Color.DarkGray, RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(Color.Transparent)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
                         Text(
                             text = card.name, fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelMedium
@@ -179,27 +192,11 @@ fun CurrentDeckTab(
                             text = "Mana Cost: ${card.mana_cost ?: "N/A"}",
                             style = MaterialTheme.typography.labelMedium
                         )
-                        if (card.toughness != null) {
-                            Text(
-                                text = "Toughness: ${card.toughness}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                        if (card.power != null) {
-                            Text(
-                                text = "Power: ${card.power}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                        Text(
-                            text = "Rarity: ${card.rarity}",
-                            style = MaterialTheme.typography.labelMedium
-                        )
                         card.image_uris?.get("normal")?.let {
                             Image(
                                 painter = rememberAsyncImagePainter(it),
                                 contentDescription = "Card Image",
-                                modifier = Modifier.size(350.dp)
+                                modifier = Modifier.size(250.dp)
                             )
                         }
                         if (!isLegal) {
@@ -229,13 +226,10 @@ fun CurrentDeckTab(
                             ) {
                                 Text("Add to Deck")
                             }
-                            SnackbarHost(
-                                hostState = snackbarHostState,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
+
                             if (showSnackbar) {
                                 LaunchedEffect(snackbarHostState) {
-                                    snackbarHostState.showSnackbar("Card added successfully!")
+                                    snackbarHostState.showSnackbar("Card added successfully!", duration = SnackbarDuration.Short)
                                     showSnackbar = false
                                 }
                             }
@@ -243,57 +237,141 @@ fun CurrentDeckTab(
                     }
                 }
             }
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                    viewModel.searchCard(it)
+                },
+                label = { Text("Search Card") },
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
         val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
-
         items(groupedDecklist.entries.toList()) { (cardName, count) ->
             val card = viewModel.decklist.value.find { it.name == cardName }
+            var showPreview by remember { mutableStateOf(false) }
+            var scale by remember { mutableStateOf(1f) }
+            var offsetX by remember { mutableStateOf(0f) }
+            var offsetY by remember { mutableStateOf(0f) }
 
-            card?.let {
+            card?.let { card ->
                 Box(
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                         .fillMaxWidth()
-                        .height(80.dp)
+                        .height(40.dp)
                 ) {
                     Card(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(4.dp),
-                        colors = CardDefaults.cardColors(Color.Transparent)
+                            .clickable { showPreview = true },
+                        colors = CardDefaults.cardColors(Color.Transparent),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.DarkGray)
                     ) {
                         Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
                         ) {
-                            it.image_uris?.get("normal")?.let { url ->
+                            card.image_uris?.get("art_crop")?.let { url ->
                                 Image(
                                     painter = rememberAsyncImagePainter(url),
                                     contentDescription = "Card Image",
                                     modifier = Modifier
-                                        .size(70.dp)
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(12.dp))
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
+                            if (showPreview) {
+                                Popup(
+                                    alignment = Alignment.Center,
+                                    onDismissRequest = { showPreview = false }
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.7f))
+                                            .clickable { showPreview = false },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        card.image_uris?.get("normal")?.let { normalUrl ->
+                                            Image(
+                                                painter = rememberAsyncImagePainter(normalUrl),
+                                                contentDescription = "Card Preview",
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .pointerInput(Unit) {
+                                                        detectTransformGestures { _, pan, zoom, _ ->
+                                                            scale *= zoom
+                                                            offsetX += pan.x
+                                                            offsetY += pan.y
+                                                        }
+                                                    }
+                                                    .graphicsLayer {
+                                                        scaleX = scale
+                                                        scaleY = scale
+                                                        translationX = offsetX
+                                                        translationY = offsetY
+                                                    }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "$cardName x$count",
-                                modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 12.dp),
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = Color.White
                             )
-                            IconButton(onClick = {
-                                viewModel.removeSingleInstanceOfCard(cardName)
-                                val updatedGroupedDecklist =
-                                    viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                                deckList.value =
-                                    updatedGroupedDecklist.entries.joinToString("\n") { (cardName, count) ->
-                                        "$cardName x$count"
-                                    }
-                            }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Remove Card", tint = Color.White)
+                            IconButton(
+                                onClick = { showDialog = true },
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove Card",
+                                    tint = Color.Red
+                                )
+                            }
+
+                            if (showDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { showDialog = false },
+                                    confirmButton = {
+                                        Button(onClick = {
+                                            viewModel.removeSingleInstanceOfCard(cardName)
+                                            val updatedGroupedDecklist = viewModel.decklist.value
+                                                .groupingBy { it.name }
+                                                .eachCount()
+                                            deckList.value =
+                                                updatedGroupedDecklist.entries.joinToString("\n") { (name, cnt) ->
+                                                    "$name x$cnt"
+                                                }
+                                            showDialog = false
+                                        }) {
+                                            Text("Confirm")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        Button(onClick = { showDialog = false }) {
+                                            Text("Cancel")
+                                        }
+                                    },
+                                    title = { Text("Confirm Deletion") },
+                                    text = { Text("Are you sure you want to remove this card?") }
+                                )
                             }
                         }
                     }
@@ -302,41 +380,66 @@ fun CurrentDeckTab(
         }
 
         item {
+            var showDialog by remember { mutableStateOf(false) }
+
             Button(
-                onClick = {
-                    val groupedDecklist =
-                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                    val deckString =
-                        groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
-                            "[$cardName x$count]"
-                        }
-
-                    if (currentUser.isNotEmpty()) {
-                        val deckData = mapOf(
-                            "DeckName" to deckName.value,
-                            "decklist" to deckString,
-                            "format" to selectedFormat.value,
-                            "deckID" to uniqueDeckID
-                        )
-
-                        decklistRef.set(deckData)
-                            .addOnSuccessListener {
-                                Log.d("Firestore", "Decklist saved successfully to Firestore.")
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.e(
-                                    "Firestore",
-                                    "Failed to save decklist: ${exception.message}"
-                                )
-                            }
-                    } else {
-                        Log.e("Firestore", "User not authenticated.")
-                    }
-                },
+                onClick = { showDialog = true },
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text("Save Decklist")
             }
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            val groupedDecklist =
+                                viewModel.decklist.value.groupingBy { it.name }
+                                    .eachCount()
+                            val deckString =
+                                groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
+                                    "[$cardName x$count]"
+                                }
+
+                            if (currentUser.isNotEmpty()) {
+                                val deckData = mapOf(
+                                    "DeckName" to deckName.value,
+                                    "decklist" to deckString,
+                                    "format" to selectedFormat.value,
+                                    "deckID" to uniqueDeckID
+                                )
+
+                                decklistRef.set(deckData)
+                                    .addOnSuccessListener {
+                                        Log.d(
+                                            "Firestore",
+                                            "Decklist saved successfully to Firestore."
+                                        )
+                                    }
+                                    .addOnFailureListener { exception ->
+                                        Log.e(
+                                            "Firestore",
+                                            "Failed to save decklist: ${exception.message}"
+                                        )
+                                    }
+                            } else {
+                                Log.e("Firestore", "User not authenticated.")
+                            }
+                            showDialog = false
+                        }) {
+                            Text("Confirm")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Confirm Save") },
+                    text = { Text("Are you sure you want to save this decklist?") }
+                )
+            }
         }
     }
 }
+

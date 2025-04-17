@@ -1,4 +1,4 @@
-package com.nickcolmenero.tcgcardshare.CreateDeck
+package com.nickcolmenero.tcgcardshare.model
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
