@@ -53,14 +53,12 @@ fun PasswordResetScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(it)
                 .padding(16.dp)
-                .background(Color.White)
         ) {
             Image(
                 painter = painterResource(R.drawable.tcgcardsharelogo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(200.dp)
-                    .background(Color.White)
             )
             Spacer(modifier = Modifier.size(16.dp))
 
@@ -98,11 +96,4 @@ fun PasswordResetScreen(navController: NavController) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PasswordResetScreenPreview() {
-    val navController = rememberNavController()
-    PasswordResetScreen(navController = navController)
 }

@@ -7,13 +7,17 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun NavigationDrawerContent(navController: NavController) {
@@ -27,26 +31,49 @@ fun NavigationDrawerContent(navController: NavController) {
         Text(text = "Navigation", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("home") }) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("home") }) {
             Text("Home")
         }
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("ShareDeckSearch") }) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("ShareDeckSearch") }) {
             Text("Search for a deck")
         }
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CreateDeckList") }) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("CreateDeckList") }) {
             Text("Create a decklist")
         }
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("AskAI") }) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("AskAI") }) {
             Text("Ask AI")
         }
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { navController.navigate("CardSearchScreen") }) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("CardSearchScreen") }) {
             Text("Search for cards")
         }
 
         Spacer(modifier = Modifier.weight(.5f))
 
-        TextButton(modifier = Modifier.fillMaxWidth(), onClick = { /* Handle logout logic here */ }) {
-            Text("Logout")
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.textButtonColors(
+                containerColor = Color.Transparent
+            ),
+            onClick = {
+                Firebase.auth.signOut()
+                navController.navigate("signin")
+            }
+        ) {
+            Text(
+                text = "Logout",
+                color = Color.Red
+            )
         }
+        Spacer(modifier = Modifier.weight(.40f))
     }
 }

@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.nickcolmenero.tcgcardshare.API.AI.ChatRequest
 import com.nickcolmenero.tcgcardshare.API.AI.Message
 import com.nickcolmenero.tcgcardshare.API.AI.createChatGptService
+import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
