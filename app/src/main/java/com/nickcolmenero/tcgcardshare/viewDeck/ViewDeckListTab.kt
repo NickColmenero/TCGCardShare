@@ -1,12 +1,20 @@
 package com.nickcolmenero.tcgcardshare.viewDeck
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,12 +34,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import com.nickcolmenero.tcgcardshare.model.CardListSeperator
+import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +56,11 @@ fun ViewDeckListTab(
     viewModel: DeckListViewModel = viewModel()
 ) {
     fun parseCardItems(deckListToItems: String): List<CardListSeperator> {
-        val rawItems = deckListToItems.removePrefix("[").removeSuffix("]").split("], [").map { it.trim() }
+        val rawItems = deckListToItems
+            .removePrefix("[")
+            .removeSuffix("]")
+            .split("], [")
+            .map { it.trim() }
         return rawItems.mapNotNull {
             val lastIndex = it.lastIndexOf(" x")
             if (lastIndex != -1) {
@@ -56,13 +72,14 @@ fun ViewDeckListTab(
     }
 
     val cardItems = parseCardItems(deckListToItems)
-    val cardImages = remember { mutableStateMapOf<String, String>() }
+    val cardThumbnails = remember { mutableStateMapOf<String, String>() }
+    val cardFullArtwork = remember { mutableStateMapOf<String, String>() }
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(cardItems) {
         cardItems.forEachIndexed { index, cardItem ->
-            delay(100L * index) // Ensure 100ms delay per image call
-            if (!cardImages.contains(cardItem.name)) {
+            delay(100L * index)
+            if (!cardThumbnails.contains(cardItem.name) || !cardFullArtwork.contains(cardItem.name)) {
                 viewModel.searchCard(cardItem.name)
             }
         }
@@ -70,12 +87,14 @@ fun ViewDeckListTab(
 
     LaunchedEffect(viewModel.scryfallDBCard.value) {
         viewModel.scryfallDBCard.value?.let { fetchedCard ->
-            fetchedCard.image_uris?.get("art_crop")?.let { imageUrl ->
-                cardImages[fetchedCard.name] = imageUrl
+            fetchedCard.image_uris?.get("art_crop")?.let { thumbnailUrl ->
+                cardThumbnails[fetchedCard.name] = thumbnailUrl
+            }
+            fetchedCard.image_uris?.get("normal")?.let { normalUrl ->
+                cardFullArtwork[fetchedCard.name] = normalUrl
             }
         }
-        // Check if all images are fetched
-        if (cardImages.size == cardItems.size) {
+        if (cardThumbnails.size == cardItems.size && cardFullArtwork.size == cardItems.size) {
             isLoading = false
         }
     }
@@ -87,31 +106,94 @@ fun ViewDeckListTab(
     } else {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize().padding(8.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
         ) {
             items(cardItems) { cardItem ->
-                val cardImageUrl = cardImages[cardItem.name]
-                Box(
-                    modifier = Modifier.padding(8.dp).fillMaxWidth()
-                ) {
-                    cardImageUrl?.let { url ->
-                        Image(
-                            painter = rememberAsyncImagePainter(url),
-                            contentDescription = "Card Image",
-                            modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp))
-                                .align(Alignment.CenterStart)
-                        )
-                    }
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(start = 110.dp).clip(MaterialTheme.shapes.medium),
-                        elevation = CardDefaults.cardElevation(4.dp)
+                val thumbnailUrl = cardThumbnails[cardItem.name]
+                thumbnailUrl?.let { url ->
+                    var showPreview by remember { mutableStateOf(false) }
+                    var scale by remember { mutableStateOf(1f) }
+                    var offsetX by remember { mutableStateOf(0f) }
+                    var offsetY by remember { mutableStateOf(0f) }
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .fillMaxWidth()
+                            .height(40.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-                            Text(
-                                text = "${cardItem.name} x ${cardItem.count}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        Card(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { showPreview = true },
+                            colors = CardDefaults.cardColors(Color.Transparent),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, Color.DarkGray)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(url),
+                                    contentDescription = "Card Thumbnail",
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "${cardItem.name} x ${cardItem.count}",
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 12.dp),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                    if (showPreview) {
+                        val normalUrl = cardFullArtwork[cardItem.name]
+                        normalUrl?.let { previewUrl ->
+                            Popup(
+                                alignment = Alignment.Center,
+                                onDismissRequest = { showPreview = false }
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.7f))
+                                        // Dismiss the popup on background tap.
+                                        .clickable { showPreview = false },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(previewUrl),
+                                        contentDescription = "Card Preview (Normal Artwork)",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .pointerInput(Unit) {
+                                                detectTransformGestures { _, pan, zoom, _ ->
+                                                    scale *= zoom
+                                                    offsetX += pan.x
+                                                    offsetY += pan.y
+                                                }
+                                            }
+                                            .graphicsLayer {
+                                                scaleX = scale
+                                                scaleY = scale
+                                                translationX = offsetX
+                                                translationY = offsetY
+                                            }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -119,4 +201,3 @@ fun ViewDeckListTab(
         }
     }
 }
-
