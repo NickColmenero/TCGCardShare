@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,10 +103,10 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
                     title = { Text(deckName) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            scope.launch { drawerState.open() }
+                            scope.launch { navController.popBackStack() }
                         }) {
                             Icon(
-                                imageVector = Icons.Default.Menu,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Menu"
                             )
                         }

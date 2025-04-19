@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.ShareDeck.QRSearch
 import com.nickcolmenero.tcgcardshare.ShareDeck.ShareDeckSearchTab
 import com.nickcolmenero.tcgcardshare.homepage.myDecks.MyDecks
 import kotlinx.coroutines.launch
@@ -67,34 +68,21 @@ fun Homepage(navController: NavController) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                rememberDrawerState(initialValue = DrawerValue.Closed)
-                rememberCoroutineScope()
-                Scaffold(
-                ) { paddingValues ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                    ) {
-                        var selectedTabIndex by remember { mutableStateOf(0) }
-                        TabRow(selectedTabIndex = selectedTabIndex) {
-                            listOf("My Decks", "Quick search").forEachIndexed { index, title ->
-                                Tab(
-                                    text = { Text(title) },
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index }
-                                )
-                            }
-                        }
-                        when (selectedTabIndex) {
-                            0 -> MyDecks(navController) // Pass format to Tab 0
-                            1 -> ShareDeckSearchTab(navController)// Pass format to Tab 1
-                        }
+                var selectedTabIndex by remember { mutableStateOf(0) }
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    listOf("My Decks", "Quick search").forEachIndexed { index, title ->
+                        Tab(
+                            text = { Text(title) },
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index }
+                        )
                     }
+                }
+                when (selectedTabIndex) {
+                    0 -> MyDecks(navController)
+                    1 -> QRSearch(navController)
                 }
             }
         }
     }
 }
-
-

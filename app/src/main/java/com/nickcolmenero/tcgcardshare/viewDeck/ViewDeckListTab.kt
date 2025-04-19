@@ -22,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -128,8 +129,8 @@ fun ViewDeckListTab(
                                 .fillMaxSize()
                                 .clickable { showPreview = true },
                             colors = CardDefaults.cardColors(Color.Transparent),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color.DarkGray)
+                            //shape = RoundedCornerShape(12.dp),
+                            //border = BorderStroke(1.dp, Color.DarkGray)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -142,7 +143,7 @@ fun ViewDeckListTab(
                                     painter = rememberAsyncImagePainter(url),
                                     contentDescription = "Card Thumbnail",
                                     modifier = Modifier
-                                        .size(40.dp)
+                                        .size(50.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -152,51 +153,52 @@ fun ViewDeckListTab(
                                         .weight(1f)
                                         .padding(end = 12.dp),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.White
                                 )
-                            }
-                        }
-                    }
-                    if (showPreview) {
-                        val normalUrl = cardFullArtwork[cardItem.name]
-                        normalUrl?.let { previewUrl ->
-                            Popup(
-                                alignment = Alignment.Center,
-                                onDismissRequest = { showPreview = false }
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Black.copy(alpha = 0.7f))
-                                        // Dismiss the popup on background tap.
-                                        .clickable { showPreview = false },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Image(
-                                        painter = rememberAsyncImagePainter(previewUrl),
-                                        contentDescription = "Card Preview (Normal Artwork)",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(RoundedCornerShape(16.dp))
-                                            .pointerInput(Unit) {
-                                                detectTransformGestures { _, pan, zoom, _ ->
-                                                    scale *= zoom
-                                                    offsetX += pan.x
-                                                    offsetY += pan.y
-                                                }
+                                if (showPreview) {
+                                    val normalUrl = cardFullArtwork[cardItem.name]
+                                    normalUrl?.let { previewUrl ->
+                                        Popup(
+                                            alignment = Alignment.Center,
+                                            onDismissRequest = { showPreview = false }
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(Color.Black.copy(alpha = 0.7f))
+                                                    // Dismiss the popup on background tap.
+                                                    .clickable { showPreview = false },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Image(
+                                                    painter = rememberAsyncImagePainter(previewUrl),
+                                                    contentDescription = "Card Preview (Normal Artwork)",
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .clip(RoundedCornerShape(16.dp))
+                                                        .pointerInput(Unit) {
+                                                            detectTransformGestures { _, pan, zoom, _ ->
+                                                                scale *= zoom
+                                                                offsetX += pan.x
+                                                                offsetY += pan.y
+                                                            }
+                                                        }
+                                                        .graphicsLayer {
+                                                            scaleX = scale
+                                                            scaleY = scale
+                                                            translationX = offsetX
+                                                            translationY = offsetY
+                                                        }
+                                                )
                                             }
-                                            .graphicsLayer {
-                                                scaleX = scale
-                                                scaleY = scale
-                                                translationX = offsetX
-                                                translationY = offsetY
-                                            }
-                                    )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+
                 }
+                HorizontalDivider()
             }
         }
     }

@@ -28,11 +28,11 @@ fun DeckItem(deck: DeckViewerModel,navController: NavController,deckOwnerID:Stri
         modifier = Modifier
             .fillMaxWidth()
             .clickable { navController.navigate("ViewDeckList/${deckOwnerID}/${deckListID}") }
-            .padding(8.dp),
+            .padding(5.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier
-            .padding(16.dp)) {
+            .padding(7.dp)) {
             Text("Deck Name: ${deck.deckName}")
             Text(
                 text = "Deck: ${deck.id}",
