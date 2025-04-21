@@ -77,6 +77,17 @@ class SearchViewModel : ViewModel() {
                 error.value = null
             } catch (e: Exception) {
                 error.value = e.message ?: "Unknown error"
+                if (error.value == "400") {
+                    error.value = "Invalid search request"
+                } else if (error.value == "401") {
+                    error.value = "You are unauthorized to view this search"
+                }else if (error.value == "403") {
+                    error.value = "You are forbidden to view this search"
+                }else if (error.value == "404") {
+                    error.value = "The card(s) can't be found"
+                }else{
+                    error.value = "Unknown error"
+                }
                 searchResults.value = emptyList()
             } finally {
                 isLoading.value = false

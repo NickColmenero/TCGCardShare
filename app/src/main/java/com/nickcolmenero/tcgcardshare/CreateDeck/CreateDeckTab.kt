@@ -82,17 +82,26 @@ fun CurrentDeckTab(
         .document(currentUser)
         .collection("decks")
         .document(uniqueDeckID)
+
     var expanded by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
+    var cardToDelete by remember { mutableStateOf<String?>(null) }
     val deckSize = viewModel.decklist.value.size
-    var showSnackbar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-    var cardToDelete by remember { mutableStateOf<String?>(null) } // 👈 Updated here
+    var showSnackbar by remember { mutableStateOf(false) }
+
+    val formats = listOf(
+        "standard", "future", "historic", "timeless", "gladiator", "pioneer",
+        "explorer", "modern", "legacy", "pauper", "vintage", "penny",
+        "commander", "oathbreaker", "standardbrawl", "brawl", "alchemy",
+        "paupercommander", "duel", "oldschool", "premodern", "predh",
+        "canadian highlander"
+    )
+
     val deckSizeMessage = when {
-        selectedFormat.value == "commander" || selectedFormat.value == "canadian highlander" -> {
-            if (deckSize != 100) "Deck must contain exactly 100 cards for ${selectedFormat.value}." else null
-        }
-        deckSize < 60 -> "Deck must contain at least 60 cards for ${selectedFormat.value}."
+        selectedFormat.value in listOf("commander", "canadian highlander") && deckSize != 100 ->
+            "Deck must contain exactly 100 cards for ${selectedFormat.value}."
+        selectedFormat.value !in listOf("commander", "canadian highlander") && deckSize < 60 ->
+            "Deck must contain at least 60 cards for ${selectedFormat.value}."
         else -> null
     }
 
@@ -112,6 +121,7 @@ fun CurrentDeckTab(
                     label = { Text("Deck Name") },
                     modifier = Modifier.weight(1f)
                 )
+
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded },
@@ -123,27 +133,15 @@ fun CurrentDeckTab(
                         readOnly = true,
                         label = { Text("Select Format") },
                         trailingIcon = {
-                            Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = "Dropdown Icon"
-                            )
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon")
                         },
-                        modifier = Modifier
-                            .menuAnchor() // Need this here otherwise it doesn't expand due to number of formats.
-                            .align(Alignment.CenterVertically)
+                        modifier = Modifier.menuAnchor()
                     )
 
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        val formats = listOf(
-                            "standard", "future", "historic", "timeless", "gladiator", "pioneer",
-                            "explorer", "modern", "legacy", "pauper", "vintage", "penny",
-                            "commander", "oathbreaker", "standardbrawl", "brawl", "alchemy",
-                            "paupercommander", "duel", "oldschool", "premodern", "predh",
-                            "canadian highlander"
-                        )
                         formats.forEach { format ->
                             DropdownMenuItem(
                                 text = { Text(format) },
@@ -156,81 +154,10 @@ fun CurrentDeckTab(
                     }
                 }
             }
-            Row {
-                SnackbarHost(hostState = snackbarHostState)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            viewModel.scryfallDBCard.value?.let { card ->
-                val legality = card.legalities
-                val isLegal = if (selectedFormat.value.isNotEmpty()) {
-                    legality[selectedFormat.value]?.let { it == "legal" } ?: false
-                } else true
-
-                Card(
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .border(1.dp, Color.DarkGray, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(Color.Transparent)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = card.name, fontWeight = FontWeight.Bold)
-                        Text(text = card.type_line)
-                        Text(text = "Mana Cost: ${card.mana_cost ?: "N/A"}")
-                        card.image_uris?.get("normal")?.let {
-                            Image(
-                                painter = rememberAsyncImagePainter(it),
-                                contentDescription = "Card Image",
-                                modifier = Modifier.size(250.dp)
-                            )
-                        }
-                        if (!isLegal) {
-                            Text(
-                                text = "This card is not legal in ${selectedFormat.value}.",
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-                        Button(
-                            onClick = {
-                                if (isLegal) {
-                                    viewModel.addCardToDeck(card)
-                                    val groupedDecklist =
-                                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                                    deckList.value =
-                                        groupedDecklist.entries.joinToString("\n") { (cardName, count) ->
-                                            "$cardName x$count"
-                                        }
-                                    showSnackbar = true
-                                }
-                            },
-                            modifier = Modifier.padding(top = 8.dp),
-                            enabled = isLegal
-                        ) {
-                            Text("Add to Deck")
-                        }
-                        if (showSnackbar) {
-                            LaunchedEffect(snackbarHostState) {
-                                snackbarHostState.showSnackbar(
-                                    "Card added successfully!",
-                                    duration = SnackbarDuration.Short
-                                )
-                                showSnackbar = false
-                            }
-                        }
-                    }
-                }
-            }
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    viewModel.searchCard(it)
-                },
-                label = { Text("Search Card") }
-            )
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
         }
+
         val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
 
         items(groupedDecklist.entries.toList()) { (cardName, count) ->
@@ -257,8 +184,7 @@ fun CurrentDeckTab(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             card.image_uris?.get("art_crop")?.let { url ->
                                 Image(
@@ -269,6 +195,7 @@ fun CurrentDeckTab(
                                         .clip(RoundedCornerShape(12.dp))
                                 )
                             }
+
                             if (showPreview) {
                                 Popup(
                                     alignment = Alignment.Center,
@@ -306,6 +233,7 @@ fun CurrentDeckTab(
                                     }
                                 }
                             }
+
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "$cardName x$count",
@@ -315,11 +243,10 @@ fun CurrentDeckTab(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color.White
                             )
+
                             IconButton(
                                 onClick = { cardToDelete = cardName },
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .size(32.dp)
+                                modifier = Modifier.size(32.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
@@ -333,6 +260,7 @@ fun CurrentDeckTab(
                 HorizontalDivider()
             }
         }
+
         item {
             Button(
                 onClick = { cardToDelete = "SAVE_DECKLIST_CONFIRM" },
@@ -342,19 +270,15 @@ fun CurrentDeckTab(
             }
         }
     }
+
     if (cardToDelete != null && cardToDelete != "SAVE_DECKLIST_CONFIRM") {
         AlertDialog(
             onDismissRequest = { cardToDelete = null },
             confirmButton = {
                 Button(onClick = {
                     viewModel.removeSingleInstanceOfCard(cardToDelete!!)
-                    val updatedGroupedDecklist = viewModel.decklist.value
-                        .groupingBy { it.name }
-                        .eachCount()
-                    deckList.value =
-                        updatedGroupedDecklist.entries.joinToString("\n") { (name, cnt) ->
-                            "$name x$cnt"
-                        }
+                    val updatedGrouped = viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                    deckList.value = updatedGrouped.entries.joinToString("\n") { (name, cnt) -> "$name x$cnt" }
                     cardToDelete = null
                 }) {
                     Text("Confirm")
@@ -375,12 +299,10 @@ fun CurrentDeckTab(
             onDismissRequest = { cardToDelete = null },
             confirmButton = {
                 Button(onClick = {
-                    val groupedDecklist =
-                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                    val deckString =
-                        groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
-                            "[$cardName x$count]"
-                        }
+                    val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                    val deckString = groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
+                        "[$cardName x$count]"
+                    }
 
                     if (currentUser.isNotEmpty()) {
                         val deckData = mapOf(
@@ -393,6 +315,7 @@ fun CurrentDeckTab(
                         decklistRef.set(deckData)
                             .addOnSuccessListener {
                                 Log.d("Firestore", "Decklist saved successfully to Firestore.")
+                                navController.navigate("home")
                             }
                             .addOnFailureListener { exception ->
                                 Log.e("Firestore", "Failed to save decklist: ${exception.message}")
@@ -414,5 +337,13 @@ fun CurrentDeckTab(
             text = { Text("Are you sure you want to save this decklist?") }
         )
     }
+    LaunchedEffect(showSnackbar) {
+        if (showSnackbar) {
+            snackbarHostState.showSnackbar(
+                "Card added successfully!",
+                duration = SnackbarDuration.Short
+            )
+            showSnackbar = false
+        }
+    }
 }
-

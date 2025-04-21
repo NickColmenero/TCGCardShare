@@ -17,6 +17,7 @@ import com.nickcolmenero.tcgcardshare.homepage.Homepage
 import com.nickcolmenero.tcgcardshare.login.passwordreset.PasswordResetScreen
 import com.nickcolmenero.tcgcardshare.login.signin.SignInScreen
 import com.nickcolmenero.tcgcardshare.login.signup.SignUpScreen
+import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import com.nickcolmenero.tcgcardshare.viewDeck.ViewDeckList
 
 
@@ -50,7 +51,7 @@ fun MainApp() {
             //---------------
 
             composable("CardSearchScreen") {
-                CardSearchScreen(navController)
+                CardSearchScreen(navController, deckViewModel = DeckListViewModel())
             }
             composable("CreateDeckList") {
                 CreateDeckList(navController)

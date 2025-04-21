@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,12 +34,19 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import com.nickcolmenero.tcgcardshare.ui_elements.ChipSelector
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = viewModel()) {
+fun CardSearchScreen(
+    navController: NavController,
+    deckList: MutableState<String>? = null,
+    selectedFormat: MutableState<String>? = null,
+    deckViewModel: DeckListViewModel,
+    viewModel: SearchViewModel = viewModel()
+) {
     var cardName by remember { mutableStateOf("") }
     var cardType by remember { mutableStateOf("") }
     var oracleText by remember { mutableStateOf("") }
@@ -188,12 +196,14 @@ fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = 
         }
         Spacer(modifier = Modifier.height(16.dp))
         viewModel.error.value?.let { errorMsg ->
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             Text(
                 text = errorMsg,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.height(16.dp))
+            }
         }
 
         viewModel.searchResults.value.forEach { card ->
@@ -220,15 +230,17 @@ fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = 
                                 .height(200.dp)
                         )
                     }
+
                     Button(
                         onClick = { showInfo = !showInfo },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
                         Text(if (showInfo) "Hide Info" else "Show Info")
                     }
+
                     if (showInfo) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "Type: ${card.type_line}")
+                        Text("Type: ${card.type_line}")
                         card.mana_cost?.let { Text("Mana Cost: $it") }
                         if (!card.power.isNullOrEmpty() && !card.toughness.isNullOrEmpty()) {
                             Text("Power/Toughness: ${card.power} / ${card.toughness}")
@@ -236,12 +248,33 @@ fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = 
                         Text("Rarity: ${card.rarity}")
                         card.set?.let { Text("Set: $it") }
                         card.oracle_text?.let { Text("Oracle Text: $it") }
-
                         Text(if (card.game_changer) "Game Changer" else "Not a Game Changer")
+                    }
+                    if (deckList != null && selectedFormat != null) {
+                        val isLegal =
+                            card.legalities[selectedFormat.value]?.let { it == "legal" } ?: true
+
+                        Button(
+                            onClick = {
+                                if (isLegal) {
+                                    deckViewModel.addCardToDeck(card) // <- use deck viewmodel
+
+                                    val grouped =
+                                        deckViewModel.decklist.value.groupingBy { it.name }
+                                            .eachCount()
+                                    deckList.value =
+                                        grouped.entries.joinToString("\n") { (name, count) -> "$name x$count" }
+                                }
+                            },
+                            enabled = isLegal,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Add to Deck")
+                        }
                     }
                 }
             }
-            HorizontalDivider()
         }
+        HorizontalDivider()
     }
 }
