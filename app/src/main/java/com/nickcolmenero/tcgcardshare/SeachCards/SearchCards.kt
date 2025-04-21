@@ -60,8 +60,8 @@ fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .verticalScroll(scrollState)
+            .padding(16.dp)
     ) {
         OutlinedTextField(
             value = cardName,
@@ -186,75 +186,62 @@ fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = 
         ) {
             Text("Search")
         }
-    }
-    Spacer(modifier = Modifier.height(16.dp))
-
-    viewModel.error.value?.let { errorMsg ->
-        Text(
-            text = errorMsg,
-            color = Color.Red,
-            style = MaterialTheme.typography.bodySmall
-        )
         Spacer(modifier = Modifier.height(16.dp))
-    }
+        viewModel.error.value?.let { errorMsg ->
+            Text(
+                text = errorMsg,
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-    viewModel.searchResults.value.forEach { card ->
-        var showInfo by remember { mutableStateOf(false) }
+        viewModel.searchResults.value.forEach { card ->
+            var showInfo by remember { mutableStateOf(false) }
 
-        Card(
-            colors = CardDefaults.cardColors(Color.Transparent),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Card(
+                colors = CardDefaults.cardColors(Color.Transparent),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
             ) {
-                Text(text = card.name, style = MaterialTheme.typography.headlineMedium)
-
-                card.image_uris?.get("normal")?.let { imageUrl ->
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = card.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    )
-                }
-
-                Button(
-                    onClick = { showInfo = !showInfo },
-                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(if (showInfo) "Hide Info" else "Show Info")
-                }
+                    Text(text = card.name, style = MaterialTheme.typography.headlineMedium)
 
-                if (showInfo) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Type: ${card.type_line}")
-                    card.mana_cost?.let { mana ->
-                        Text(text = "Mana Cost: $mana")
+                    card.image_uris?.get("normal")?.let { imageUrl ->
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = card.name,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                        )
                     }
-
-                    if (!card.power.isNullOrEmpty() && !card.toughness.isNullOrEmpty()) {
-                        Text(text = "Power/Toughness: ${card.power} / ${card.toughness}")
+                    Button(
+                        onClick = { showInfo = !showInfo },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(if (showInfo) "Hide Info" else "Show Info")
                     }
+                    if (showInfo) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Type: ${card.type_line}")
+                        card.mana_cost?.let { Text("Mana Cost: $it") }
+                        if (!card.power.isNullOrEmpty() && !card.toughness.isNullOrEmpty()) {
+                            Text("Power/Toughness: ${card.power} / ${card.toughness}")
+                        }
+                        Text("Rarity: ${card.rarity}")
+                        card.set?.let { Text("Set: $it") }
+                        card.oracle_text?.let { Text("Oracle Text: $it") }
 
-                    Text(text = "Rarity: ${card.rarity}")
-
-                    card.set?.let { setName ->
-                        Text(text = "Set: $setName")
+                        Text(if (card.game_changer) "Game Changer" else "Not a Game Changer")
                     }
-
-                    card.oracle_text?.let { oracleText ->
-                        Text(text = "Oracle Text: $oracleText")
-                    }
-
-                    Text(text = if (card.game_changer) "Game Changer" else "Not a Game Changer")
                 }
             }
+            HorizontalDivider()
         }
-        HorizontalDivider()
     }
 }
