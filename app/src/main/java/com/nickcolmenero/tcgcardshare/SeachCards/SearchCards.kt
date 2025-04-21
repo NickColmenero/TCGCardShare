@@ -1,157 +1,260 @@
 package com.nickcolmenero.tcgcardshare.SeachCards
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
-import com.nickcolmenero.tcgcardshare.API.Scryfall.CardViewModel
-import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
-import kotlinx.coroutines.launch
+import coil.compose.AsyncImage
+import com.nickcolmenero.tcgcardshare.ui_elements.ChipSelector
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CardSearchScreen(navController: NavController, viewModel: CardViewModel = viewModel()) {
+fun CardSearchScreen(navController: NavController, viewModel: SearchViewModel = viewModel()) {
     var cardName by remember { mutableStateOf("") }
-    var isSearching by remember { mutableStateOf(false) }
-    val card by remember { viewModel.scryfallDBCard }
-    val error by remember { viewModel.error }
-    // for navigation on side
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    var cardType by remember { mutableStateOf("") }
+    var oracleText by remember { mutableStateOf("") }
+    var selectedColors by remember { mutableStateOf(setOf<String>()) }
+    var manaCost by remember { mutableStateOf("") }
+    var power by remember { mutableStateOf("") }
+    var toughness by remember { mutableStateOf("") }
+    var isGameChanger by remember { mutableStateOf(false) }
+    var selectedRarity by remember { mutableStateOf("Any") }
+    var legalFormat by remember { mutableStateOf("Any") }
+    var cardSet by remember { mutableStateOf("") }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        modifier = Modifier,
-        drawerContent = {
-            NavigationDrawerContent(navController)
-        }
+    val rarityOptions = listOf("Any", "Common", "Uncommon", "Rare", "Mythic")
+    val legalFormatsOptions = listOf("Any", "Standard", "Modern", "Legacy", "Vintage", "Commander")
+    val colorOptions = listOf("W", "U", "B", "R", "G")
 
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState)
     ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Card Search") },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
-                            )
+        OutlinedTextField(
+            value = cardName,
+            onValueChange = { cardName = it },
+            label = { Text("Card Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = cardType,
+            onValueChange = { cardType = it },
+            label = { Text("Type") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = oracleText,
+            onValueChange = { oracleText = it },
+            label = { Text("Oracle Text") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+
+        Text("Colors")
+        FlowRow() {
+            colorOptions.forEach { color ->
+                FilterChip(
+                    selected = selectedColors.contains(color),
+                    onClick = {
+                        selectedColors = if (selectedColors.contains(color)) {
+                            selectedColors - color
+                        } else {
+                            selectedColors + color
                         }
-                    }
+                    },
+                    label = { Text(color) }
                 )
             }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if (isSearching && card == null && error == null) {
-                        CircularProgressIndicator()
-                    }
-                    card?.let {
-                        CardInfoDisplay(scryfallDBCard = it)
-                    }
-                    error?.let {
-                        Text(text = it, color = Color.Red)
-                    }
+        }
+        Spacer(Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = cardName,
-                        onValueChange = { cardName = it },
+        OutlinedTextField(
+            value = manaCost,
+            onValueChange = { manaCost = it },
+            label = { Text("Mana Cost") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = power,
+                onValueChange = { power = it },
+                label = { Text("Power") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = toughness,
+                onValueChange = { toughness = it },
+                label = { Text("Toughness") },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = isGameChanger,
+                onCheckedChange = { isGameChanger = it }
+            )
+            Text("Game Changer")
+        }
+        Spacer(Modifier.height(8.dp))
+
+        ChipSelector(
+            label = "Rarity",
+            options = rarityOptions,
+            selectedOption = selectedRarity,
+            onOptionSelected = { selectedRarity = it }
+        )
+        Spacer(Modifier.height(8.dp))
+
+        ChipSelector(
+            label = "Legal Format",
+            options = legalFormatsOptions,
+            selectedOption = legalFormat,
+            onOptionSelected = { legalFormat = it }
+        )
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = cardSet,
+            onValueChange = { cardSet = it },
+            label = { Text("Set") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                viewModel.searchCards(
+                    cardName = cardName,
+                    colorIdentity = selectedColors.joinToString(","),
+                    manaValue = manaCost,
+                    type = cardType,
+                    rarity = if (selectedRarity == "Any") "" else selectedRarity,
+                    artist = "",
+                    legalFormat = if (legalFormat == "Any") "" else legalFormat,
+                    power = power,
+                    toughness = toughness,
+                    cardSet = cardSet,
+                    oracleText = oracleText,
+                    gameChanger = isGameChanger
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Search")
+        }
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+
+    viewModel.error.value?.let { errorMsg ->
+        Text(
+            text = errorMsg,
+            color = Color.Red,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    viewModel.searchResults.value.forEach { card ->
+        var showInfo by remember { mutableStateOf(false) }
+
+        Card(
+            colors = CardDefaults.cardColors(Color.Transparent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(text = card.name, style = MaterialTheme.typography.headlineMedium)
+
+                card.image_uris?.get("normal")?.let { imageUrl ->
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = card.name,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge
+                            .height(200.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
-                    Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Button(
+                    onClick = { showInfo = !showInfo },
+                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                ) {
+                    Text(if (showInfo) "Hide Info" else "Show Info")
+                }
 
-                        Button(onClick = {
-                            if (cardName.isNotEmpty()) {
-                                viewModel.searchCard(cardName)
-                                isSearching = true
-                            }
-                        }){
-                            Text("Search")
-                        }
+                if (showInfo) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "Type: ${card.type_line}")
+                    card.mana_cost?.let { mana ->
+                        Text(text = "Mana Cost: $mana")
                     }
+
+                    if (!card.power.isNullOrEmpty() && !card.toughness.isNullOrEmpty()) {
+                        Text(text = "Power/Toughness: ${card.power} / ${card.toughness}")
+                    }
+
+                    Text(text = "Rarity: ${card.rarity}")
+
+                    card.set?.let { setName ->
+                        Text(text = "Set: $setName")
+                    }
+
+                    card.oracle_text?.let { oracleText ->
+                        Text(text = "Oracle Text: $oracleText")
+                    }
+
+                    Text(text = if (card.game_changer) "Game Changer" else "Not a Game Changer")
                 }
             }
         }
-    }
-
-}
-
-@Composable
-fun CardInfoDisplay(scryfallDBCard: ScryfallDBCard) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = scryfallDBCard.name, fontSize = 16.sp)
-        Text(text = "Type: ${scryfallDBCard.type_line}")
-        Text(text = "Mana Cost: ${scryfallDBCard.mana_cost ?: "N/A"}")
-        Text(text = "Rarity: ${scryfallDBCard.rarity}")
-        Row {
-            if (scryfallDBCard.power != null) {
-                Text(text = "Power: ${scryfallDBCard.power}")
-            }
-            if (scryfallDBCard.toughness != null) {
-                Text(text = " Toughness: ${scryfallDBCard.toughness}")
-            }
-        }
-        scryfallDBCard.image_uris?.get("normal")?.let {
-            Image(painter = rememberAsyncImagePainter(it),
-                contentDescription = "Card Image",
-                modifier = Modifier.size(500.dp)
-            )
-        }
+        HorizontalDivider()
     }
 }

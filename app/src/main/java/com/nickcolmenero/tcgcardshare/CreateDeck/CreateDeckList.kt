@@ -25,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import kotlinx.coroutines.launch
 

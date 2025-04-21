@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

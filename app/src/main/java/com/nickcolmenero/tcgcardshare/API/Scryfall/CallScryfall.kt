@@ -12,13 +12,24 @@ data class ScryfallDBCard(
     val power: String?,
     val toughness: String?,
     val rarity: String,
-    val legalities: Map<Any, Any>,  // Assume it's a Map for simplicity
-    val set: String?,                    // New field for the card's set
-    val artist: String?,                 // New field for the artist's name
-    val flavor_text: String?             // New field for the flavor text
+    val legalities: Map<Any, Any>,
+    val set: String?,
+    val artist: String?,
+    val color_identity: List<String>?,
+    val oracle_text: String? = null,
+    val game_changer:Boolean,
+    val flavor_text: String,
+)
+
+data class ScryfallSearchResult(
+    val data: List<ScryfallDBCard>
 )
 
 interface ScryfallApi {
     @GET("cards/named")
     suspend fun getCardByName(@Query("fuzzy") cardName: String): ScryfallDBCard
+
+    @GET("cards/search")
+    suspend fun searchCards(@Query("q") query: String): ScryfallSearchResult
+
 }

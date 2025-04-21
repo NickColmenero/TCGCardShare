@@ -26,9 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.nickcolmenero.tcgcardshare.NavDrawer.NavigationDrawerContent
+import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.ShareDeck.QRSearch
-import com.nickcolmenero.tcgcardshare.ShareDeck.ShareDeckSearchTab
 import com.nickcolmenero.tcgcardshare.homepage.myDecks.MyDecks
 import kotlinx.coroutines.launch
 
