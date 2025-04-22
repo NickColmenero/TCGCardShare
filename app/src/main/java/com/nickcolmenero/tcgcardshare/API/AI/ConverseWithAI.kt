@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
@@ -72,7 +73,8 @@ fun ChatScreen(
                         }
                     }
                 )
-            }
+            },
+            bottomBar = { BottomNavigationBar(navController) }
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
@@ -102,7 +104,9 @@ fun ChatScreen(
                                 )
                                 try {
                                     val response = apiService.getChatResponse(request)
-                                    val newResponse = response.choices.firstOrNull()?.message?.content ?: "No response"
+                                    val newResponse =
+                                        response.choices.firstOrNull()?.message?.content
+                                            ?: "No response"
                                     viewModel.updateChatResponse(newResponse)
                                 } catch (e: Exception) {
                                     viewModel.updateChatResponse("Error: ${e.message}")

@@ -99,7 +99,6 @@ fun DeckItem(deck: DeckViewerModel, navController: NavController, deckOwnerID: S
 
         Column(modifier = Modifier.padding(7.dp)) {
             Text("Deck Name: ${deck.deckName}")
-            Text("Deck: ${deck.id}")
             Spacer(modifier = Modifier.width(8.dp))
             Text("Format: ${deck.deckFormat}")
             Spacer(modifier = Modifier.height(4.dp))

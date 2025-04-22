@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -79,7 +80,7 @@ fun CurrentDeckTab(
         .document(uniqueDeckID)
 
     var expanded by remember { mutableStateOf(false) }
-    var cardToDelete by remember { mutableStateOf<String?>(null) }
+    var specificCard by remember { mutableStateOf<String?>(null) }
     val deckSize = viewModel.decklist.value.size
     val snackbarHostState = remember { SnackbarHostState() }
     var showSnackbar by remember { mutableStateOf(false) }
@@ -237,10 +238,24 @@ fun CurrentDeckTab(
                                     .padding(end = 12.dp),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
+                            IconButton(
+                                onClick = {
+                                    // Add another instance of the card to the deck
+                                    viewModel.addCardToDeck(card)
+                                    showSnackbar = true
+                                },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Another Card",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
 
                             IconButton(
-                                onClick = { cardToDelete = cardName },
-                                modifier = Modifier.size(32.dp)
+                                onClick = { specificCard = cardName },
+                                modifier = Modifier.size(20.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
@@ -257,7 +272,7 @@ fun CurrentDeckTab(
 
         item {
             Button(
-                onClick = { cardToDelete = "SAVE_DECKLIST_CONFIRM" },
+                onClick = { specificCard = "SAVE_DECKLIST_CONFIRM" },
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text("Save Decklist")
@@ -265,21 +280,21 @@ fun CurrentDeckTab(
         }
     }
 
-    if (cardToDelete != null && cardToDelete != "SAVE_DECKLIST_CONFIRM") {
+    if (specificCard != null && specificCard != "SAVE_DECKLIST_CONFIRM") {
         AlertDialog(
-            onDismissRequest = { cardToDelete = null },
+            onDismissRequest = { specificCard = null },
             confirmButton = {
                 Button(onClick = {
-                    viewModel.removeSingleInstanceOfCard(cardToDelete!!)
+                    viewModel.removeSingleInstanceOfCard(specificCard!!)
                     val updatedGrouped = viewModel.decklist.value.groupingBy { it.name }.eachCount()
                     deckList.value = updatedGrouped.entries.joinToString("\n") { (name, cnt) -> "$name x$cnt" }
-                    cardToDelete = null
+                    specificCard = null
                 }) {
                     Text("Confirm")
                 }
             },
             dismissButton = {
-                Button(onClick = { cardToDelete = null }) {
+                Button(onClick = { specificCard = null }) {
                     Text("Cancel")
                 }
             },
@@ -288,9 +303,9 @@ fun CurrentDeckTab(
         )
     }
 
-    if (cardToDelete == "SAVE_DECKLIST_CONFIRM") {
+    if (specificCard == "SAVE_DECKLIST_CONFIRM") {
         AlertDialog(
-            onDismissRequest = { cardToDelete = null },
+            onDismissRequest = { specificCard = null },
             confirmButton = {
                 Button(onClick = {
                     val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
@@ -317,13 +332,13 @@ fun CurrentDeckTab(
                     } else {
                         Log.e("Firestore", "User not authenticated.")
                     }
-                    cardToDelete = null
+                    specificCard = null
                 }) {
                     Text("Confirm")
                 }
             },
             dismissButton = {
-                Button(onClick = { cardToDelete = null }) {
+                Button(onClick = { specificCard = null }) {
                     Text("Cancel")
                 }
             },

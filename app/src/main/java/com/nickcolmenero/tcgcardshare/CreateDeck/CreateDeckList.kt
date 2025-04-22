@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
+import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,7 @@ fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = 
                         }
                     }
                 )
-            }
+            },bottomBar = { BottomNavigationBar(navController) }
         ) { paddingValues ->
             Column(
                 modifier = Modifier

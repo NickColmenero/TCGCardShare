@@ -41,7 +41,7 @@ fun NavigationDrawerContent(navController: NavController) {
         TextButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = { navController.navigate("ShareDeckSearch") }) {
-            Text("Search for a deck")
+            Text("Find A decklist")
         }
         TextButton(
             modifier = Modifier.fillMaxWidth(),
@@ -55,7 +55,7 @@ fun NavigationDrawerContent(navController: NavController) {
         }
         TextButton(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { navController.navigate("CardSearchScreen") }) {
+            onClick = { navController.navigate("SearchScreenNotDeckBuild") }) {
             Text("Search for cards")
         }
 

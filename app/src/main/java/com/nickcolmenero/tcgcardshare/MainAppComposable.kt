@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.nickcolmenero.tcgcardshare.API.AI.ChatScreen
 import com.nickcolmenero.tcgcardshare.CreateDeck.CreateDeckList
 import com.nickcolmenero.tcgcardshare.SeachCards.CardSearchScreen
+import com.nickcolmenero.tcgcardshare.SeachCards.SearchScreenNotDeckBuild
 import com.nickcolmenero.tcgcardshare.ShareDeck.ShareDeckSearch
 import com.nickcolmenero.tcgcardshare.homepage.Homepage
 import com.nickcolmenero.tcgcardshare.login.passwordreset.PasswordResetScreen
@@ -56,6 +57,9 @@ fun MainApp() {
 
             composable("CardSearchScreen") {
                 CardSearchScreen(navController,null,selectedDeckFormat, deckViewModel = DeckListViewModel(),)
+            }
+            composable("SearchScreenNotDeckBuild") {
+                SearchScreenNotDeckBuild(navController,null,selectedDeckFormat, deckViewModel = DeckListViewModel())
             }
             composable("CreateDeckList") {
                 CreateDeckList(navController)

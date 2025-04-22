@@ -10,8 +10,8 @@ val SecondaryLight = Color(0xFF7B20B4)
 val TertiaryLight = Color(0xFF391679)
 
 // Dark Theme Colors
-val PrimaryDark = Color(0xFFE8532E)
+val PrimaryDark = Color(0xFF127380)
 val PrimaryDarkText = Color(0xFF868686)
 val OnPrimaryDark = Color.Black
-val SecondaryDark = Color(0xFF700B0B)
-val TertiaryDark = Color(0xFFFF8152)
+val SecondaryDark = Color(0xFF0C6E81)
+val TertiaryDark = Color(0xFF144E5E)

@@ -32,6 +32,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
+import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import kotlinx.coroutines.launch
 
 
@@ -111,7 +112,7 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
                         }
                     }
                 )
-            }
+            },bottomBar = { BottomNavigationBar(navController) }
         ) { paddingValues ->
             Column(
                 modifier = Modifier

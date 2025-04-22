@@ -30,6 +30,7 @@ import com.google.firebase.auth.auth
 import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.ShareDeck.QRSearch
 import com.nickcolmenero.tcgcardshare.homepage.myDecks.MyDecks
+import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +62,7 @@ fun Homepage(navController: NavController) {
                         }
                     }
                 )
-            }
+            },bottomBar = { BottomNavigationBar(navController) }
         ) { paddingValues ->
             Column(
                 modifier = Modifier

@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
@@ -59,7 +60,7 @@ fun ShareDeckSearch(navController: NavController) {
                         }
                     }
                 )
-            }
+            },bottomBar = { BottomNavigationBar(navController) }
         ) { paddingValues ->
             Column(
                 modifier = Modifier

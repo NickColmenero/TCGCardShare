@@ -12,20 +12,31 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,10 +46,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
+import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import com.nickcolmenero.tcgcardshare.ui_elements.ChipSelector
+import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
+import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CardSearchScreen(
     navController: NavController,
@@ -48,6 +62,8 @@ fun CardSearchScreen(
     viewModel: SearchViewModel = viewModel()
 ) {
     var cardName by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var cardType by remember { mutableStateOf("") }
     var oracleText by remember { mutableStateOf("") }
     var selectedColors by remember { mutableStateOf(setOf<String>()) }
@@ -71,56 +87,47 @@ fun CardSearchScreen(
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
-        OutlinedTextField(
-            value = cardName,
-            onValueChange = { cardName = it },
-            label = { Text("Card Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = cardType,
-            onValueChange = { cardType = it },
-            label = { Text("Type")},
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = oracleText,
-            onValueChange = { oracleText = it },
-            label = { Text("Oracle Text") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(8.dp))
-
-        Text("Colors")
-        FlowRow() {
-            colorOptions.forEach { color ->
-                FilterChip(
-                    selected = selectedColors.contains(color),
-                    onClick = {
-                        selectedColors = if (selectedColors.contains(color)) {
-                            selectedColors - color
-                        } else {
-                            selectedColors + color
-                        }
-                    },
-                    label = { Text(color) }
-                )
-            }
+        // Card Name and Mana Cost in the same row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = cardName,
+                onValueChange = { cardName = it },
+                label = { Text("Card Name") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = manaCost,
+                onValueChange = { manaCost = it },
+                label = { Text("Mana Cost") },
+                modifier = Modifier.weight(1f)
+            )
         }
         Spacer(Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = manaCost,
-            onValueChange = { manaCost = it },
-            label = { Text("Mana Cost") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Type and Oracle Text in the same row (Type first, then Oracle Text)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = cardType,
+                onValueChange = { cardType = it },
+                label = { Text("Type") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = oracleText,
+                onValueChange = { oracleText = it },
+                label = { Text("Oracle Text") },
+                modifier = Modifier.weight(1f)
+            )
+        }
         Spacer(Modifier.height(8.dp))
 
+        // Power and Toughness in a Row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -140,6 +147,7 @@ fun CardSearchScreen(
         }
         Spacer(Modifier.height(8.dp))
 
+        // Game Changer Checkbox
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = isGameChanger,
@@ -149,6 +157,7 @@ fun CardSearchScreen(
         }
         Spacer(Modifier.height(8.dp))
 
+        // Chip Selectors for Rarity and Legal Format
         ChipSelector(
             label = "Rarity",
             options = rarityOptions,
@@ -165,6 +174,7 @@ fun CardSearchScreen(
         )
         Spacer(Modifier.height(8.dp))
 
+        // Set field
         OutlinedTextField(
             value = cardSet,
             onValueChange = { cardSet = it },
@@ -173,7 +183,8 @@ fun CardSearchScreen(
         )
         Spacer(Modifier.height(16.dp))
 
-        Button(
+
+    Button(
             onClick = {
                 viewModel.searchCards(
                     cardName = cardName,
