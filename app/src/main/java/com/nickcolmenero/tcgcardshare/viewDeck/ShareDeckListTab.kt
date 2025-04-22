@@ -33,7 +33,7 @@ fun ShareDeckListTab(navController: NavController, deckOwnerID: String, decklist
         item {
             Text(
                 "Deck Owner's ID: $deckOwnerID \n Decklist ID: $decklistID",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary
             )
         }
         item {

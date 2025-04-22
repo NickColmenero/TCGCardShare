@@ -1,7 +1,12 @@
 package com.nickcolmenero.tcgcardshare.CreateDeck
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -11,7 +16,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -134,6 +147,7 @@ fun AIDeckHelp(
             }
         }
 
+        // Display suggested cards in the list
         items(aiResponseCards) { card ->
             Card(
                 modifier = Modifier
@@ -149,17 +163,22 @@ fun AIDeckHelp(
                         style = MaterialTheme.typography.headlineMedium
                     )
 
-                    // Show button only if the card is fully loaded
+                    // Add to Deck Button - Refactored Logic
                     if (card.name.isNotBlank()) {
                         Button(
                             onClick = {
-                                val newDecklist = buildString {
-                                    append(deckList.value)
-                                    append("\n")
-                                    append("${card.name} x1")
-                                }
-                                deckList.value = newDecklist
+                                // ✅ Add card to ViewModel's decklist
+                                viewModel.addCardToDeck(card)
+
+                                // ✅ Update string-based deckList view
+                                val updatedGrouped =
+                                    viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                                deckList.value =
+                                    updatedGrouped.entries.joinToString("\n") { (name, count) -> "$name x$count" }
+
+                                // ✅ Logging for debug
                                 Log.d("AIDeckHelp", "Added card: ${card.name}")
+                                Log.d("DeckList", "Updated decklist: ${deckList.value}")
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -169,8 +188,7 @@ fun AIDeckHelp(
                         Text(
                             text = "Loading card data...",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(8.dp)
-                        )
+                            modifier = Modifier.padding(8.dp))
                     }
                 }
             }

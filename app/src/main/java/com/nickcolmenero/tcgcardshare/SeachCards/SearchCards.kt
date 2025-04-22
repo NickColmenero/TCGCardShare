@@ -82,7 +82,7 @@ fun CardSearchScreen(
         OutlinedTextField(
             value = cardType,
             onValueChange = { cardType = it },
-            label = { Text("Type") },
+            label = { Text("Type")},
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))

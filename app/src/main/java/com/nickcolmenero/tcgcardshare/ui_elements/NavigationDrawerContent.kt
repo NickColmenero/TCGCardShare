@@ -30,7 +30,7 @@ fun NavigationDrawerContent(navController: NavController) {
             .fillMaxWidth(.5F)
             .padding(16.dp)
     ) {
-        Text(text = "Navigation", style = MaterialTheme.typography.titleLarge)
+        Text(text = "Navigation", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(16.dp))
 
         TextButton(
