@@ -1,5 +1,6 @@
 package com.nickcolmenero.tcgcardshare.API.Scryfall
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -26,6 +27,15 @@ class CardViewModel : ViewModel() {
                 error.value = "Network error: ${e.message}"
                 scryfallDBCard.value = null
             }
+        }
+    }
+
+    suspend fun getCardsByCollection(request: CollectionRequest): ScryfallSearchResult? {
+        return try {
+            RetrofitInstance.api.getCardsByCollection(request)
+        } catch (e: Exception) {
+            error.value = "Failed to fetch collection: ${e.message}"
+            null
         }
     }
 }

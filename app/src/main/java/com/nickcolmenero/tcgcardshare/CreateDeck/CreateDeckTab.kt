@@ -69,7 +69,7 @@ import java.util.UUID
 @Composable
 fun CurrentDeckTab(
     navController: NavController,
-    viewModel: DeckListViewModel = viewModel(),
+    viewModel: DeckListViewModel,
     deckName: MutableState<String>,
     deckList: MutableState<String>,
     selectedFormat: MutableState<String>

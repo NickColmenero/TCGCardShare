@@ -4,6 +4,8 @@ package com.nickcolmenero.tcgcardshare
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +32,8 @@ fun MainApp() {
         val navController = rememberNavController()
         val currentUser = FirebaseAuth.getInstance().currentUser
         val start = if (currentUser != null) "home" else "signin"
+        val selectedDeckFormat =
+            remember { mutableStateOf("") }
         NavHost(
             navController = navController,
             startDestination = start
@@ -51,7 +55,7 @@ fun MainApp() {
             //---------------
 
             composable("CardSearchScreen") {
-                CardSearchScreen(navController, deckViewModel = DeckListViewModel())
+                CardSearchScreen(navController,null,selectedDeckFormat, deckViewModel = DeckListViewModel(),)
             }
             composable("CreateDeckList") {
                 CreateDeckList(navController)

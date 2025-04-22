@@ -25,9 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.nickcolmenero.tcgcardshare.SeachCards.CardSearchScreen
-import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
+import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +70,7 @@ fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = 
                 val deckName =
                     remember { mutableStateOf("") }
                 TabRow(selectedTabIndex = selectedTabIndex) {
-                    listOf("Current Deck","Search","Suggestions").forEachIndexed { index, title ->
+                    listOf("Current Deck", "Search", "Suggestions").forEachIndexed { index, title ->
                         Tab(
                             text = { Text(title) },
                             selected = selectedTabIndex == index,
@@ -88,7 +87,14 @@ fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = 
                         deckList,
                         selectedDeckFormat
                     )
-                    1 -> CardSearchScreen(navController,deckList,selectedDeckFormat,viewModel())
+
+                    1 -> CreateDeckSearchScreen(
+                        navController,
+                        deckName,
+                        deckList,
+                        selectedDeckFormat,
+                        viewModel,
+                    )
 
                     2 -> AIDeckHelp(
                         navController,

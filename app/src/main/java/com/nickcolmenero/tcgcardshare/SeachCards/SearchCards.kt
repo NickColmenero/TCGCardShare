@@ -43,7 +43,7 @@ import com.nickcolmenero.tcgcardshare.ui_elements.ChipSelector
 fun CardSearchScreen(
     navController: NavController,
     deckList: MutableState<String>? = null,
-    selectedFormat: MutableState<String>? = null,
+    selectedFormat: MutableState<String>,
     deckViewModel: DeckListViewModel,
     viewModel: SearchViewModel = viewModel()
 ) {
