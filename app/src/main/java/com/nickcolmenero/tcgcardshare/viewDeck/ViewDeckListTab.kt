@@ -43,6 +43,8 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.nickcolmenero.tcgcardshare.API.Scryfall.CardIdentifier
+import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequest
 import com.nickcolmenero.tcgcardshare.model.CardListSeperator
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import kotlinx.coroutines.delay
@@ -77,17 +79,19 @@ fun ViewDeckListTab(
     val cardFullArtwork = remember { mutableStateMapOf<String, String>() }
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(cardItems) {
-        cardItems.forEachIndexed { index, cardItem ->
-            delay(100L * index)
-            if (!cardThumbnails.contains(cardItem.name) || !cardFullArtwork.contains(cardItem.name)) {
-                viewModel.searchCard(cardItem.name)
-            }
-        }
+    // Collect all card names for the collection request
+    val cardNames = cardItems.map { it.name }
+
+    LaunchedEffect(cardNames) {
+        val collectionRequest = CollectionRequest(
+            identifiers = cardNames.map { CardIdentifier(it) }
+        )
+        viewModel.getCardsByCollection(collectionRequest)
     }
 
-    LaunchedEffect(viewModel.scryfallDBCard.value) {
-        viewModel.scryfallDBCard.value?.let { fetchedCard ->
+    LaunchedEffect(viewModel.decklist.value) {
+        val fetchedCards = viewModel.decklist.value
+        fetchedCards.forEach { fetchedCard ->
             fetchedCard.image_uris?.get("art_crop")?.let { thumbnailUrl ->
                 cardThumbnails[fetchedCard.name] = thumbnailUrl
             }
@@ -95,6 +99,7 @@ fun ViewDeckListTab(
                 cardFullArtwork[fetchedCard.name] = normalUrl
             }
         }
+
         if (cardThumbnails.size == cardItems.size && cardFullArtwork.size == cardItems.size) {
             isLoading = false
         }
@@ -129,8 +134,6 @@ fun ViewDeckListTab(
                                 .fillMaxSize()
                                 .clickable { showPreview = true },
                             colors = CardDefaults.cardColors(Color.Transparent),
-                            //shape = RoundedCornerShape(12.dp),
-                            //border = BorderStroke(1.dp, Color.DarkGray)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -165,7 +168,6 @@ fun ViewDeckListTab(
                                                 modifier = Modifier
                                                     .fillMaxSize()
                                                     .background(Color.Black.copy(alpha = 0.7f))
-                                                    // Dismiss the popup on background tap.
                                                     .clickable { showPreview = false },
                                                 contentAlignment = Alignment.Center
                                             ) {
@@ -196,7 +198,6 @@ fun ViewDeckListTab(
                             }
                         }
                     }
-
                 }
                 HorizontalDivider()
             }

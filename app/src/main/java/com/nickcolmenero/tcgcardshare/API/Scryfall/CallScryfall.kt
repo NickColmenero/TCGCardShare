@@ -37,6 +37,8 @@ data class CollectionRequest(
     val identifiers: List<CardIdentifier>
 )
 
+
+
 // Retrofit API interface
 interface ScryfallApi {
 

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequest
 import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
 import com.nickcolmenero.tcgcardshare.API.Scryfall.RetrofitInstance
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +36,34 @@ class DeckListViewModel @Inject constructor() : ViewModel() {
             } catch (e: IOException) {
                 error.value = "Network error: ${e.message}"
                 scryfallDBCard.value = null
+            }
+        }
+    }
+
+    fun getCardsByCollection(request: CollectionRequest) {
+        viewModelScope.launch {
+            try {
+                val batchSize = 75
+                val identifiers = request.identifiers
+                val batchedRequests = identifiers.chunked(batchSize) // Split into batches of 75 or less
+
+                var allFetchedCards = mutableListOf<ScryfallDBCard>()
+
+                // Fetch each batch sequentially
+                for (batch in batchedRequests) {
+                    val batchRequest = CollectionRequest(identifiers = batch)
+                    val response = RetrofitInstance.api.getCardsByCollection(batchRequest)
+                    allFetchedCards.addAll(response.data)
+                }
+
+                decklist.value = allFetchedCards // Update the decklist with all the fetched cards
+                error.value = null
+            } catch (e: HttpException) {
+                error.value = "HTTP error: ${e.message}"
+                decklist.value = emptyList() // Reset decklist on error
+            } catch (e: IOException) {
+                error.value = "Network error: ${e.message}"
+                decklist.value = emptyList() // Reset decklist on error
             }
         }
     }
