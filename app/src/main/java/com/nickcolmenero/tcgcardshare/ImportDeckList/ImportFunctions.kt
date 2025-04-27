@@ -13,31 +13,43 @@ fun parseDecklist(file: File, source: String): List<Card> {
 }
 
 fun parseMoxfieldFile(file: File): List<Card> {
-    // Parse the Moxfield JSON file (you may need a JSON parser like Moshi or Gson)
-    val json = file.readText()
-    val moxfieldDeck = Gson().fromJson(json,MoxfieldDeck::class.java)
-    return moxfieldDeck?.cards?.map { Card(it.name, it.quantity) } ?: emptyList()
-}
-
-fun parseArchidectFile(file: File): List<Card> {
-    // Parse the Archidect JSON file
-    val json = file.readText()
-    val archidectDeck = Gson().fromJson(json, ArchidectDeck::class.java)
-    return archidectDeck.cards.map { Card(it.name, it.quantity) }
-}
-
-fun parseTappedOutFile(file: File): List<Card> {
-    // Parse the TappedOut plain text or CSV format
     val lines = file.readLines()
     return lines.mapNotNull { line ->
-        val parts = line.split(" x")
-        if (parts.size == 2) {
-            Card(parts[0].trim(), parts[1].toInt())
-        } else {
-            null
+        val regex = Regex("""(\d+)x (.*?) \(""") // Matches '1x Card Name ('
+        val matchResult = regex.find(line)
+        matchResult?.let {
+            val (quantityStr, name) = it.destructured
+            Card(name.trim(), quantityStr.toInt())
         }
     }
 }
+
+
+fun parseArchidectFile(file: File): List<Card> {
+    val lines = file.readLines()
+    return lines.mapNotNull { line ->
+        val regex = Regex("""(\d+)x (.*?) \(""")
+        val matchResult = regex.find(line)
+        matchResult?.let {
+            val (quantityStr, name) = it.destructured
+            Card(name.trim(), quantityStr.toInt())
+        }
+    }
+}
+
+
+fun parseTappedOutFile(file: File): List<Card> {
+    val lines = file.readLines()
+    return lines.mapNotNull { line ->
+        val regex = Regex("""(\d+)x (.*?)($|$)""") // TappedOut might just be '2x Card Name'
+        val matchResult = regex.find(line)
+        matchResult?.let {
+            val (quantityStr, name) = it.destructured
+            Card(name.trim(), quantityStr.toInt())
+        }
+    }
+}
+
 
 data class Card(val name: String, val quantity: Int)
 

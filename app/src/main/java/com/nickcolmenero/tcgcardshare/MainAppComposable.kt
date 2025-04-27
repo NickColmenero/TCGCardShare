@@ -7,12 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.nickcolmenero.tcgcardshare.API.AI.ChatScreen
 import com.nickcolmenero.tcgcardshare.CreateDeck.CreateDeckList
+import com.nickcolmenero.tcgcardshare.ImportDeckList.ImportDecklistScreen
 import com.nickcolmenero.tcgcardshare.SeachCards.CardSearchScreen
 import com.nickcolmenero.tcgcardshare.SeachCards.SearchScreenNotDeckBuild
 import com.nickcolmenero.tcgcardshare.ShareDeck.ShareDeckSearch
@@ -78,6 +80,10 @@ fun MainApp() {
             composable("ShareDeckSearch")
             {
                 ShareDeckSearch(navController)
+            }
+            composable("ImportDecklistScreen")
+            {
+                ImportDecklistScreen(DeckListViewModel(),navController)
             }
         }
     }

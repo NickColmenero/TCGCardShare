@@ -58,6 +58,11 @@ fun NavigationDrawerContent(navController: NavController) {
             onClick = { navController.navigate("SearchScreenNotDeckBuild") }) {
             Text("Search for cards")
         }
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("ImportDecklistScreen") }) {
+            Text("Import a deck")
+        }
 
         Spacer(modifier = Modifier.weight(.5f))
 
@@ -76,6 +81,7 @@ fun NavigationDrawerContent(navController: NavController) {
                 color = Color.Red
             )
         }
+
         Spacer(modifier = Modifier.weight(.40f))
     }
 }
