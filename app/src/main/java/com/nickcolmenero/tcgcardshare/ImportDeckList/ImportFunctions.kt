@@ -12,18 +12,6 @@ fun parseDecklist(file: File, source: String): List<Card> {
     }
 }
 
-fun parseMoxfieldFile(file: File): List<Card> {
-    val lines = file.readLines()
-    return lines.mapNotNull { line ->
-        val regex = Regex("""(\d+)x (.*?) \(""") // Matches '1x Card Name ('
-        val matchResult = regex.find(line)
-        matchResult?.let {
-            val (quantityStr, name) = it.destructured
-            Card(name.trim(), quantityStr.toInt())
-        }
-    }
-}
-
 
 fun parseArchidectFile(file: File): List<Card> {
     val lines = file.readLines()
@@ -38,17 +26,31 @@ fun parseArchidectFile(file: File): List<Card> {
 }
 
 
-fun parseTappedOutFile(file: File): List<Card> {
+fun parseMoxfieldFile(file: File): List<Card> {
     val lines = file.readLines()
     return lines.mapNotNull { line ->
-        val regex = Regex("""(\d+)x (.*?)($|$)""") // TappedOut might just be '2x Card Name'
-        val matchResult = regex.find(line)
+        val regex = Regex("""^(\d+)\s+(.+)$""")
+        val matchResult = regex.find(line.trim())
         matchResult?.let {
             val (quantityStr, name) = it.destructured
             Card(name.trim(), quantityStr.toInt())
         }
     }
 }
+
+fun parseTappedOutFile(file: File): List<Card> {
+    val lines = file.readLines()
+    return lines.mapNotNull { line ->
+        val cleanLine = line.removePrefix("SB:").trim()
+        val regex = Regex("""^(\d+)\s+(.+)$""")
+        val matchResult = regex.find(cleanLine)
+        matchResult?.let {
+            val (quantityStr, name) = it.destructured
+            Card(name.trim(), quantityStr.toInt())
+        }
+    }
+}
+
 
 
 data class Card(val name: String, val quantity: Int)

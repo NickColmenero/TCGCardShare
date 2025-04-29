@@ -103,6 +103,7 @@ fun ViewDeckListTab(
     // Populate image URLs once decklist is fetched
     LaunchedEffect(viewModel.decklist.value) {
         val fetchedCards = viewModel.decklist.value
+
         fetchedCards.forEach { card ->
             card.image_uris?.get("art_crop")?.let { thumbnailUrl ->
                 cardThumbnails[card.name] = thumbnailUrl
@@ -111,8 +112,9 @@ fun ViewDeckListTab(
                 cardFullArtwork[card.name] = normalUrl
             }
         }
-        isLoading = cardThumbnails.size != cardItems.size || cardFullArtwork.size != cardItems.size
+        isLoading = false
     }
+
 
     val groupedBySubTypes = viewModel.decklist.value.groupBy { card ->
         subTypes.find { it -> card.type_line?.contains(it, ignoreCase = true) == true }
