@@ -32,6 +32,7 @@ class CardViewModel : ViewModel() {
 
     suspend fun getCardsByCollection(request: CollectionRequest): ScryfallSearchResult? {
         return try {
+            delay(100)
             RetrofitInstance.api.getCardsByCollection(request)
         } catch (e: Exception) {
             error.value = "Failed to fetch collection: ${e.message}"
