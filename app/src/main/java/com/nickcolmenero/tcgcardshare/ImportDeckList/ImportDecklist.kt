@@ -12,7 +12,9 @@ fun importDecklist(
     viewModel: DeckListViewModel,
     decklistRef: DocumentReference,
     uniqueDeckID: String,
-    navController: NavController
+    navController: NavController,
+    deckName:String,
+    deckFormat:String
 ) {
     val cards = parseDecklist(file, source)
     val groupedDecklist = cards.groupingBy { it.name }.eachCount()
@@ -21,9 +23,9 @@ fun importDecklist(
     }
 
     val deckData = mapOf(
-        "DeckName" to "Imported Deck",
+        "DeckName" to deckName,
         "decklist" to deckString,
-        "format" to "Standard",
+        "format" to deckFormat,
         "deckID" to uniqueDeckID
     )
     decklistRef.set(deckData)
