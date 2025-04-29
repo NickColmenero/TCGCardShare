@@ -147,7 +147,6 @@ fun AIDeckHelp(
             }
         }
 
-        // Display suggested cards in the list
         items(aiResponseCards) { card ->
             Card(
                 modifier = Modifier
@@ -163,20 +162,15 @@ fun AIDeckHelp(
                         style = MaterialTheme.typography.headlineMedium
                     )
 
-                    // Add to Deck Button - Refactored Logic
                     if (card.name.isNotBlank()) {
                         Button(
                             onClick = {
-                                // ✅ Add card to ViewModel's decklist
                                 viewModel.addCardToDeck(card)
-
-                                // ✅ Update string-based deckList view
                                 val updatedGrouped =
                                     viewModel.decklist.value.groupingBy { it.name }.eachCount()
                                 deckList.value =
                                     updatedGrouped.entries.joinToString("\n") { (name, count) -> "$name x$count" }
 
-                                // ✅ Logging for debug
                                 Log.d("AIDeckHelp", "Added card: ${card.name}")
                                 Log.d("DeckList", "Updated decklist: ${deckList.value}")
                             },

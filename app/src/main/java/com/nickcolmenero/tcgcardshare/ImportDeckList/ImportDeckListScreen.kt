@@ -243,7 +243,9 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
                                         uniqueDeckID,
                                         navController,
                                         deckName,
-                                        deckFormat
+                                        deckFormat,
+                                        snackbarHostState,
+                                        coroutineScope
                                     )
                                 } ?: snackbarHostState.showSnackbar("Failed to process file!")
                             }
@@ -255,9 +257,8 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
                 ) {
                     Text("Import Decklist")
                 }
+                SnackbarHost(hostState = snackbarHostState)
             }
-
-            SnackbarHost(hostState = snackbarHostState)
         }
     }
 }

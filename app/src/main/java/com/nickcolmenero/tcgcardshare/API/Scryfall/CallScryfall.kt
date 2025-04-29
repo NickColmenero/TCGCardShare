@@ -23,12 +23,10 @@ data class ScryfallDBCard(
     val flavor_text: String,
 )
 
-// Data model for search results
 data class ScryfallSearchResult(
     val data: List<ScryfallDBCard>
 )
 
-// Data model for collection request
 data class CardIdentifier(
     val name: String
 )

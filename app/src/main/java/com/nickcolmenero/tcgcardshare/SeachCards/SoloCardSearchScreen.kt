@@ -33,21 +33,19 @@ fun SearchScreenNotDeckBuild(
     selectedFormat: MutableState<String>,
     deckViewModel: DeckListViewModel
 ) {
-    // Remember the coroutine scope and drawer state
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            NavigationDrawerContent(navController) // your drawer content here
+            NavigationDrawerContent(navController)
         }
     ) {
-        // Scaffold to handle topBar and bottomBar
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Chat Screen", color = MaterialTheme.colorScheme.primary) },
+                    title = { Text("Search for cards", color = MaterialTheme.colorScheme.primary) },
                     navigationIcon = {
                         IconButton(onClick = {
                             coroutineScope.launch { drawerState.open() }
@@ -61,16 +59,14 @@ fun SearchScreenNotDeckBuild(
                 )
             },
             bottomBar = {
-                BottomNavigationBar(navController) // your bottom navigation here
+                BottomNavigationBar(navController)
             }
         ) { paddingValues ->
-            // Use a Row for the content (this is not typical for the full screen, but here's how to do it)
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Apply padding here
+                    .padding(paddingValues)
             ) {
-                // Inside the Row, you can place CardSearchScreen
                 CardSearchScreen(
                     navController = navController,
                     deckList = deckList,

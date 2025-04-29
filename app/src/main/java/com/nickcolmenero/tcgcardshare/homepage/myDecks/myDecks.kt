@@ -31,7 +31,7 @@ fun MyDecks(navController: NavController) {
                         id = document.id,
                         deckName =document.getString("DeckName")?:"",
                         deckFormat = document.getString("format") ?:"",
-                        rawCards = document.getString("decklist") ?: "" // Fetch other fields if needed
+                        rawCards = document.getString("decklist") ?: ""
                     )
                 }
             }

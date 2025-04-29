@@ -85,8 +85,8 @@ fun ShareDeckSearch(navController: NavController) {
                             }
                         }
                         when (selectedTabIndex) {
-                            0 -> ShareDeckSearchTab(navController) // Pass format to Tab 0
-                            1 -> QRSearch(navController)// Pass format to Tab 1
+                            0 -> ShareDeckSearchTab(navController)
+                            1 -> QRSearch(navController)
                         }
                     }
                 }

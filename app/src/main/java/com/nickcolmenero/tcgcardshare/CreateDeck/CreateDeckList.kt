@@ -66,7 +66,7 @@ fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = 
                     .padding(paddingValues)
             ) {
                 var selectedTabIndex by remember { mutableStateOf(0) }
-                val deckList = remember { mutableStateOf("") } // Shared state for the decklist
+                val deckList = remember { mutableStateOf("") }
                 val selectedDeckFormat =
                     remember { mutableStateOf("") }
                 val deckName =

@@ -50,7 +50,7 @@ fun CreateDeckSearchScreen(
                 QuickSearchSection(
                     navController = navController,
                     deckList = deckList,
-                    selectedFormat = selectedFormat,  // Pass selectedFormat here
+                    selectedFormat = selectedFormat,
                     deckViewModel = deckViewModel
                 )
             }
@@ -58,7 +58,7 @@ fun CreateDeckSearchScreen(
                 CardSearchScreen(
                     navController = navController,
                     deckList = deckList,
-                    selectedFormat = selectedFormat,  // Pass selectedFormat here
+                    selectedFormat = selectedFormat,
                     deckViewModel = deckViewModel,
                     viewModel()
                 )

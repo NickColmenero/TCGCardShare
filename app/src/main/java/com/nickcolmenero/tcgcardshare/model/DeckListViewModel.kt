@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DeckListViewModel @Inject constructor() : ViewModel() {
     var scryfallDBCard = mutableStateOf<ScryfallDBCard?>(null)
-    val decklist = mutableStateOf<List<ScryfallDBCard>>(emptyList()) // Maintain decklist here
+    val decklist = mutableStateOf<List<ScryfallDBCard>>(emptyList())
     var error = mutableStateOf<String?>(null)
 
     fun searchCard(cardName: String) {
@@ -56,14 +56,14 @@ class DeckListViewModel @Inject constructor() : ViewModel() {
                     val response = RetrofitInstance.api.getCardsByCollection(batchRequest)
                     allFetchedCards.addAll(response.data)
                 }
-                decklist.value = allFetchedCards // Update the decklist with all the fetched cards
+                decklist.value = allFetchedCards
                 error.value = null
             } catch (e: HttpException) {
                 error.value = "HTTP error: ${e.message}"
-                decklist.value = emptyList() // Reset decklist on error
+                decklist.value = emptyList()
             } catch (e: IOException) {
                 error.value = "Network error: ${e.message}"
-                decklist.value = emptyList() // Reset decklist on error
+                decklist.value = emptyList()
             }
         }
     }
@@ -74,7 +74,7 @@ class DeckListViewModel @Inject constructor() : ViewModel() {
 
     fun removeSingleInstanceOfCard(cardName: String) {
         val updatedDecklist = decklist.value.toMutableList()
-        val cardToRemove = updatedDecklist.find { it.name == cardName } // Find one instance
+        val cardToRemove = updatedDecklist.find { it.name == cardName }
         if (cardToRemove != null) {
             updatedDecklist.remove(cardToRemove)
         }

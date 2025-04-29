@@ -240,7 +240,6 @@ fun CurrentDeckTab(
                             )
                             IconButton(
                                 onClick = {
-                                    // Add another instance of the card to the deck
                                     viewModel.addCardToDeck(card)
                                     showSnackbar = true
                                 },

@@ -3,7 +3,6 @@ package com.nickcolmenero.tcgcardshare.SeachCards
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,24 +11,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -46,10 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
-import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import com.nickcolmenero.tcgcardshare.ui_elements.ChipSelector
-import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -87,7 +75,6 @@ fun CardSearchScreen(
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
-        // Card Name and Mana Cost in the same row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -106,8 +93,6 @@ fun CardSearchScreen(
             )
         }
         Spacer(Modifier.height(8.dp))
-
-        // Type and Oracle Text in the same row (Type first, then Oracle Text)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -127,7 +112,6 @@ fun CardSearchScreen(
         }
         Spacer(Modifier.height(8.dp))
 
-        // Power and Toughness in a Row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -147,7 +131,6 @@ fun CardSearchScreen(
         }
         Spacer(Modifier.height(8.dp))
 
-        // Game Changer Checkbox
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = isGameChanger,
@@ -157,7 +140,6 @@ fun CardSearchScreen(
         }
         Spacer(Modifier.height(8.dp))
 
-        // Chip Selectors for Rarity and Legal Format
         ChipSelector(
             label = "Rarity",
             options = rarityOptions,
@@ -174,7 +156,6 @@ fun CardSearchScreen(
         )
         Spacer(Modifier.height(8.dp))
 
-        // Set field
         OutlinedTextField(
             value = cardSet,
             onValueChange = { cardSet = it },
@@ -268,7 +249,7 @@ fun CardSearchScreen(
                         Button(
                             onClick = {
                                 if (isLegal) {
-                                    deckViewModel.addCardToDeck(card) // <- use deck viewmodel
+                                    deckViewModel.addCardToDeck(card)
 
                                     val grouped =
                                         deckViewModel.decklist.value.groupingBy { it.name }

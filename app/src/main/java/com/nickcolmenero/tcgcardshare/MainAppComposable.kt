@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -45,7 +44,6 @@ fun MainApp() {
             composable("home") {
                 Homepage(navController)
             }
-            // FOR SIGNIN------
             composable("signin") {
                 SignInScreen(navController)
             }
@@ -55,8 +53,6 @@ fun MainApp() {
             composable("passwordreset") {
                 PasswordResetScreen(navController)
             }
-            //---------------
-
             composable("CardSearchScreen") {
                 CardSearchScreen(navController,null,selectedDeckFormat, deckViewModel = DeckListViewModel(),)
             }
