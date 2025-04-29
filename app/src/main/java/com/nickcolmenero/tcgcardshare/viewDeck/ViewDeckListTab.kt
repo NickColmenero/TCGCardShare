@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,30 +61,38 @@ fun ViewDeckListTab(
     deckListToItems: String,
     viewModel: DeckListViewModel = viewModel()
 ) {
-    fun parseCardItems(deckListToItems: String): List<CardListSeperator> {
-        val rawItems = deckListToItems
+    val subTypes = listOf(
+        "Creature", "Planeswalker", "Sorcery", "Instant", "Land", "Artifact", "Enchantment", "Battle"
+    )
+
+    // Parse the deck list string into a list of CardListSeperator (name + count)
+    val cardItems = remember(deckListToItems) {
+        deckListToItems
             .removePrefix("[")
             .removeSuffix("]")
             .split("], [")
-            .map { it.trim() }
-        return rawItems.mapNotNull {
-            val lastIndex = it.lastIndexOf(" x")
-            if (lastIndex != -1) {
-                val name = it.substring(0, lastIndex).trim()
-                val count = it.substring(lastIndex + 2).toIntOrNull()
-                count?.let { CardListSeperator(name, it) }
-            } else null
-        }
+            .mapNotNull { entry ->
+                val lastIndex = entry.lastIndexOf(" x")
+                if (lastIndex != -1) {
+                    val name = entry.substring(0, lastIndex).trim()
+                    val count = entry.substring(lastIndex + 2).toIntOrNull()
+                    count?.let { CardListSeperator(name, it) }
+                } else null
+            }
     }
 
-    val cardItems = parseCardItems(deckListToItems)
+    // Map for fast lookup of counts
+    val cardCountMap = remember(cardItems) {
+        cardItems.associate { it.name to it.count }
+    }
+
+    val cardNames = cardItems.map { it.name }
+
     val cardThumbnails = remember { mutableStateMapOf<String, String>() }
     val cardFullArtwork = remember { mutableStateMapOf<String, String>() }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Collect all card names for the collection request
-    val cardNames = cardItems.map { it.name }
-
+    // Fetch the cards by collection
     LaunchedEffect(cardNames) {
         val collectionRequest = CollectionRequest(
             identifiers = cardNames.map { CardIdentifier(it) }
@@ -89,117 +100,139 @@ fun ViewDeckListTab(
         viewModel.getCardsByCollection(collectionRequest)
     }
 
+    // Populate image URLs once decklist is fetched
     LaunchedEffect(viewModel.decklist.value) {
         val fetchedCards = viewModel.decklist.value
-        fetchedCards.forEach { fetchedCard ->
-            fetchedCard.image_uris?.get("art_crop")?.let { thumbnailUrl ->
-                cardThumbnails[fetchedCard.name] = thumbnailUrl
+        fetchedCards.forEach { card ->
+            card.image_uris?.get("art_crop")?.let { thumbnailUrl ->
+                cardThumbnails[card.name] = thumbnailUrl
             }
-            fetchedCard.image_uris?.get("normal")?.let { normalUrl ->
-                cardFullArtwork[fetchedCard.name] = normalUrl
+            card.image_uris?.get("normal")?.let { normalUrl ->
+                cardFullArtwork[card.name] = normalUrl
             }
         }
-
-        if (cardThumbnails.size == cardItems.size && cardFullArtwork.size == cardItems.size) {
-            isLoading = false
-        }
+        isLoading = cardThumbnails.size != cardItems.size || cardFullArtwork.size != cardItems.size
     }
 
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    val groupedBySubTypes = viewModel.decklist.value.groupBy { card ->
+        subTypes.find { it -> card.type_line?.contains(it, ignoreCase = true) == true }
+            ?: "Unknown"
+    }
+
+    val types = subTypes.filter { groupedBySubTypes.contains(it) }
+
+    if (isLoading || types.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator()
         }
     } else {
         LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            items(cardItems) { cardItem ->
-                val thumbnailUrl = cardThumbnails[cardItem.name]
-                thumbnailUrl?.let { url ->
-                    var showPreview by remember { mutableStateOf(false) }
-                    var scale by remember { mutableStateOf(1f) }
-                    var offsetX by remember { mutableStateOf(0f) }
-                    var offsetY by remember { mutableStateOf(0f) }
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                            .fillMaxWidth()
-                            .height(40.dp)
-                    ) {
-                        Card(
+            types.forEach { type ->
+                item {
+                    Text(
+                        text = type,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                items(groupedBySubTypes[type] ?: emptyList()) { card ->
+                    val thumbnailUrl = cardThumbnails[card.name]
+                    val count = cardCountMap[card.name] ?: 1
+
+                    thumbnailUrl?.let { url ->
+                        var showPreview by remember { mutableStateOf(false) }
+                        var scale by remember { mutableStateOf(1f) }
+                        var offsetX by remember { mutableStateOf(0f) }
+                        var offsetY by remember { mutableStateOf(0f) }
+
+                        Box(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .clickable { showPreview = true },
-                            colors = CardDefaults.cardColors(Color.Transparent),
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .fillMaxWidth()
+                                .height(40.dp)
                         ) {
-                            Row(
+                            Card(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
+                                    .clickable { showPreview = true },
+                                colors = CardDefaults.cardColors(Color.Transparent)
                             ) {
-                                Image(
-                                    painter = rememberAsyncImagePainter(url),
-                                    contentDescription = "Card Thumbnail",
+                                Row(
                                     modifier = Modifier
-                                        .size(50.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = "${cardItem.name} x ${cardItem.count}",
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 12.dp),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                                if (showPreview) {
-                                    val normalUrl = cardFullArtwork[cardItem.name]
-                                    normalUrl?.let { previewUrl ->
-                                        Popup(
-                                            alignment = Alignment.Center,
-                                            onDismissRequest = { showPreview = false }
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .background(Color.Black.copy(alpha = 0.7f))
-                                                    .clickable { showPreview = false },
-                                                contentAlignment = Alignment.Center
+                                        .fillMaxSize()
+                                        .padding(horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(url),
+                                        contentDescription = "Card Thumbnail",
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "${card.name} x$count",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 12.dp)
+                                    )
+
+                                    // Card Preview Popup
+                                    if (showPreview) {
+                                        val fullArtworkUrl = cardFullArtwork[card.name]
+                                        fullArtworkUrl?.let { previewUrl ->
+                                            Popup(
+                                                alignment = Alignment.Center,
+                                                onDismissRequest = { showPreview = false }
                                             ) {
-                                                Image(
-                                                    painter = rememberAsyncImagePainter(previewUrl),
-                                                    contentDescription = "Card Preview (Normal Artwork)",
+                                                Box(
                                                     modifier = Modifier
                                                         .fillMaxSize()
-                                                        .clip(RoundedCornerShape(16.dp))
-                                                        .pointerInput(Unit) {
-                                                            detectTransformGestures { _, pan, zoom, _ ->
-                                                                scale *= zoom
-                                                                offsetX += pan.x
-                                                                offsetY += pan.y
+                                                        .background(Color.Black.copy(alpha = 0.7f))
+                                                        .clickable { showPreview = false },
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Image(
+                                                        painter = rememberAsyncImagePainter(previewUrl),
+                                                        contentDescription = "Card Preview (Normal Artwork)",
+                                                        modifier = Modifier
+                                                            .fillMaxSize()
+                                                            .clip(RoundedCornerShape(16.dp))
+                                                            .pointerInput(Unit) {
+                                                                detectTransformGestures { _, pan, zoom, _ ->
+                                                                    scale *= zoom
+                                                                    offsetX += pan.x
+                                                                    offsetY += pan.y
+                                                                }
                                                             }
-                                                        }
-                                                        .graphicsLayer {
-                                                            scaleX = scale
-                                                            scaleY = scale
-                                                            translationX = offsetX
-                                                            translationY = offsetY
-                                                        }
-                                                )
+                                                            .graphicsLayer {
+                                                                scaleX = scale
+                                                                scaleY = scale
+                                                                translationX = offsetX
+                                                                translationY = offsetY
+                                                            }
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                        HorizontalDivider()
                     }
                 }
-                HorizontalDivider()
             }
         }
     }

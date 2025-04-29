@@ -43,19 +43,19 @@ class DeckListViewModel @Inject constructor() : ViewModel() {
     fun getCardsByCollection(request: CollectionRequest) {
         viewModelScope.launch {
             try {
+                delay(100)
                 val batchSize = 75
                 val identifiers = request.identifiers
                 val batchedRequests = identifiers.chunked(batchSize) // Split into batches of 75 or less
 
                 var allFetchedCards = mutableListOf<ScryfallDBCard>()
 
-                // Fetch each batch sequentially
                 for (batch in batchedRequests) {
+                    delay(100)
                     val batchRequest = CollectionRequest(identifiers = batch)
                     val response = RetrofitInstance.api.getCardsByCollection(batchRequest)
                     allFetchedCards.addAll(response.data)
                 }
-
                 decklist.value = allFetchedCards // Update the decklist with all the fetched cards
                 error.value = null
             } catch (e: HttpException) {

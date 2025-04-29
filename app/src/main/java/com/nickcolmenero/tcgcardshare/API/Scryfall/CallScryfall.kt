@@ -42,15 +42,12 @@ data class CollectionRequest(
 // Retrofit API interface
 interface ScryfallApi {
 
-    // Single card fuzzy search
     @GET("cards/named")
     suspend fun getCardByName(@Query("fuzzy") cardName: String): ScryfallDBCard
 
-    // Search with a complex query (e.g., "oracle:draw format:modern")
     @GET("cards/search")
     suspend fun searchCards(@Query("q") query: String): ScryfallSearchResult
 
-    // Fetch a batch of specific cards (up to 75 at a time)
     @POST("cards/collection")
     suspend fun getCardsByCollection(@Body request: CollectionRequest): ScryfallSearchResult
 }

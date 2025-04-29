@@ -16,7 +16,7 @@ object RetrofitInstance {
 
         val headerInterceptor = Interceptor { chain ->
             val request = chain.request().newBuilder()
-                .addHeader("User-Agent", "TCGCardShare/7.1.3")
+                .addHeader("User-Agent", "TCGCardShare/7.1.7")
                 .addHeader("Accept", "*/*")
                 .build()
             chain.proceed(request)
