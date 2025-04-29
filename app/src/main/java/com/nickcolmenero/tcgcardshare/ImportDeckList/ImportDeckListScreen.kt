@@ -151,7 +151,6 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
                             },
                             modifier = Modifier
                                 .menuAnchor()
-                                .height(56.dp)
                         )
 
                         ExposedDropdownMenu(
