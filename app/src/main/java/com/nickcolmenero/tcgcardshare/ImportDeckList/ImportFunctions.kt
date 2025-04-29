@@ -1,5 +1,6 @@
 package com.nickcolmenero.tcgcardshare.ImportDeckList
 
+import android.util.Log
 import com.google.gson.Gson
 import java.io.File
 
@@ -46,7 +47,9 @@ fun parseTappedOutFile(file: File): List<Card> {
         val matchResult = regex.find(cleanLine)
         matchResult?.let {
             val (quantityStr, name) = it.destructured
+            Log.e("Cards imported as objects","${Card(name,quantityStr.toInt())}")
             Card(name.trim(), quantityStr.toInt())
+
         }
     }
 }

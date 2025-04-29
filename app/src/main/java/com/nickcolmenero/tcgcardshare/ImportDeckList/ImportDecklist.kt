@@ -13,12 +13,16 @@ fun importDecklist(
     decklistRef: DocumentReference,
     uniqueDeckID: String,
     navController: NavController,
-    deckName:String,
-    deckFormat:String
+    deckName: String,
+    deckFormat: String
 ) {
     val cards = parseDecklist(file, source)
-    val groupedDecklist = cards.groupingBy { it.name }.eachCount()
-    val deckString = groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
+    val cardMap = mutableMapOf<String, Int>()
+    cards.forEach { card ->
+        cardMap[card.name] = cardMap.getOrDefault(card.name, 0) + card.quantity
+    }
+
+    val deckString = cardMap.entries.joinToString(", ") { (cardName, count) ->
         "[$cardName x$count]"
     }
 
