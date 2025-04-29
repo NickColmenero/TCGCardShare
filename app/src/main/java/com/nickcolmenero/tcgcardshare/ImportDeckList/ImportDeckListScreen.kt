@@ -78,7 +78,6 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
     ) {
         Text(text = "Import Decklist", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
 
-        // Dropdown for source selection
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
@@ -86,7 +85,7 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
         ) {
             OutlinedTextField(
                 value = selectedFormat,
-                onValueChange = {}, // Read-only field
+                onValueChange = {},
                 readOnly = true,
                 label = { Text("Select Format") },
                 trailingIcon = {
@@ -113,16 +112,12 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
 
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // File picker button
         Button(
             onClick = { filePickerLauncher.launch("*/*") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Select Decklist File")
         }
-
-        // Display selected file info
         decklistUri?.let {
             Text(
                 text = "Selected file: $it",
@@ -130,8 +125,6 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-
-        // Import button
         Button(
             onClick = {
                 if (decklistUri == null || selectedFormat.isEmpty()) {
@@ -157,7 +150,6 @@ fun ImportDecklistScreen(viewModel: DeckListViewModel, navController: NavControl
         }
     }
 
-    // Snackbar host
     SnackbarHost(hostState = snackbarHostState)
 }
 
