@@ -64,8 +64,6 @@ fun ViewDeckListTab(
     val subTypes = listOf(
         "Creature", "Planeswalker", "Sorcery", "Instant", "Land", "Artifact", "Enchantment", "Battle"
     )
-
-    // Parse the deck list string into a list of CardListSeperator (name + count)
     val cardItems = remember(deckListToItems) {
         deckListToItems
             .removePrefix("[")
@@ -81,7 +79,6 @@ fun ViewDeckListTab(
             }
     }
 
-    // Map for fast lookup of counts
     val cardCountMap = remember(cardItems) {
         cardItems.associate { it.name to it.count }
     }
@@ -91,16 +88,12 @@ fun ViewDeckListTab(
     val cardThumbnails = remember { mutableStateMapOf<String, String>() }
     val cardFullArtwork = remember { mutableStateMapOf<String, String>() }
     var isLoading by remember { mutableStateOf(true) }
-
-    // Fetch the cards by collection
     LaunchedEffect(cardNames) {
         val collectionRequest = CollectionRequest(
             identifiers = cardNames.map { CardIdentifier(it) }
         )
         viewModel.getCardsByCollection(collectionRequest)
     }
-
-    // Populate image URLs once decklist is fetched
     LaunchedEffect(viewModel.decklist.value) {
         val fetchedCards = viewModel.decklist.value
 
@@ -189,8 +182,6 @@ fun ViewDeckListTab(
                                             .weight(1f)
                                             .padding(end = 12.dp)
                                     )
-
-                                    // Card Preview Popup
                                     if (showPreview) {
                                         val fullArtworkUrl = cardFullArtwork[card.name]
                                         fullArtworkUrl?.let { previewUrl ->
