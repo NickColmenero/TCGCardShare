@@ -53,7 +53,7 @@ fun DeckItem(deck: DeckViewerModel, navController: NavController, deckOwnerID: S
                     }
                 )
             },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         DropdownMenu(
             expanded = showMenu,

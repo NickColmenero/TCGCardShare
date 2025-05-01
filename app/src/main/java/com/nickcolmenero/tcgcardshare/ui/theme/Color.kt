@@ -3,7 +3,7 @@ package com.nickcolmenero.tcgcardshare.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Light Theme Colors
-val PrimaryLight = Color(0xFF0F0C7C)
+val PrimaryLight = Color(0xFF650202)
 val PrimaryLightText = Color(0xFF181818)
 val OnPrimaryLight = Color.White
 val SecondaryLight = Color(0xFF7B20B4)
