@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,6 +61,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
+import com.nickcolmenero.tcgcardshare.ImportDeckList.Card
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import java.util.UUID
 
@@ -84,6 +90,45 @@ fun CurrentDeckTab(
     val deckSize = viewModel.decklist.value.size
     val snackbarHostState = remember { SnackbarHostState() }
     var showSnackbar by remember { mutableStateOf(false) }
+    var previewCard by remember { mutableStateOf<ScryfallDBCard?>(null) }
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+    if (previewCard != null) {
+        Popup() {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+                    .background(Color.Black.copy(alpha = 0.85f))
+                    .clickable { previewCard = null },
+                contentAlignment = Alignment.Center
+            ) {
+                previewCard?.image_uris?.get("normal")?.let { normalUrl ->
+                    Image(
+                        painter = rememberAsyncImagePainter(normalUrl),
+                        contentDescription = "Card Preview",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTransformGestures { _, pan, zoom, _ ->
+                                    scale *= zoom
+                                    offsetX += pan.x
+                                    offsetY += pan.y
+                                }
+                            }
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                                translationX = offsetX
+                                translationY = offsetY
+                            }
+                    )
+                }
+            }
+        }
+    }
+
 
     val formats = listOf(
         "standard", "future", "historic", "timeless", "gladiator", "pioneer",
@@ -158,10 +203,6 @@ fun CurrentDeckTab(
 
         items(groupedDecklist.entries.toList()) { (cardName, count) ->
             val card = viewModel.decklist.value.find { it.name == cardName }
-            var showPreview by remember { mutableStateOf(false) }
-            var scale by remember { mutableStateOf(1f) }
-            var offsetX by remember { mutableStateOf(0f) }
-            var offsetY by remember { mutableStateOf(0f) }
 
             card?.let {
                 Box(
@@ -173,7 +214,12 @@ fun CurrentDeckTab(
                     Card(
                         modifier = Modifier
                             .fillMaxSize()
-                            .clickable { showPreview = true },
+                            .clickable {
+                                previewCard = card
+                                scale = 1f
+                                offsetX = 0f
+                                offsetY = 0f
+                            },
                         colors = CardDefaults.cardColors(Color.Transparent)
                     ) {
                         Row(
@@ -190,44 +236,6 @@ fun CurrentDeckTab(
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                 )
-                            }
-
-                            if (showPreview) {
-                                Popup(
-                                    alignment = Alignment.Center,
-                                    onDismissRequest = { showPreview = false }
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.Black.copy(alpha = 0.7f))
-                                            .clickable { showPreview = false },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        card.image_uris?.get("normal")?.let { normalUrl ->
-                                            Image(
-                                                painter = rememberAsyncImagePainter(normalUrl),
-                                                contentDescription = "Card Preview",
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .clip(RoundedCornerShape(16.dp))
-                                                    .pointerInput(Unit) {
-                                                        detectTransformGestures { _, pan, zoom, _ ->
-                                                            scale *= zoom
-                                                            offsetX += pan.x
-                                                            offsetY += pan.y
-                                                        }
-                                                    }
-                                                    .graphicsLayer {
-                                                        scaleX = scale
-                                                        scaleY = scale
-                                                        translationX = offsetX
-                                                        translationY = offsetY
-                                                    }
-                                            )
-                                        }
-                                    }
-                                }
                             }
 
                             Spacer(modifier = Modifier.width(12.dp))
@@ -298,7 +306,7 @@ fun CurrentDeckTab(
                 }
             },
             title = { Text("Confirm Deletion") },
-            text = { Text("Are you sure you want to remove this card?") }
+            text = { Text("Are you sure you want to remove this card?" ) }
         )
     }
 
@@ -345,6 +353,7 @@ fun CurrentDeckTab(
             text = { Text("Are you sure you want to save this decklist?") }
         )
     }
+
     LaunchedEffect(showSnackbar) {
         if (showSnackbar) {
             snackbarHostState.showSnackbar(

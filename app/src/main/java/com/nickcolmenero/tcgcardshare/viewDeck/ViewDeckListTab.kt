@@ -1,20 +1,20 @@
 package com.nickcolmenero.tcgcardshare.viewDeck
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,8 +25,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,9 +46,9 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.nickcolmenero.tcgcardshare.API.Scryfall.CardIdentifier
 import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequest
+import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
 import com.nickcolmenero.tcgcardshare.model.CardListSeperator
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +60,16 @@ fun ViewDeckListTab(
     viewModel: DeckListViewModel = viewModel()
 ) {
     val subTypes = listOf(
-        "Creature", "Planeswalker", "Sorcery", "Instant", "Land", "Artifact", "Enchantment", "Battle"
+        "Creature",
+        "Planeswalker",
+        "Sorcery",
+        "Instant",
+        "Land",
+        "Artifact",
+        "Enchantment",
+        "Battle"
     )
+
     val cardItems = remember(deckListToItems) {
         deckListToItems
             .removePrefix("[")
@@ -88,12 +94,59 @@ fun ViewDeckListTab(
     val cardThumbnails = remember { mutableStateMapOf<String, String>() }
     val cardFullArtwork = remember { mutableStateMapOf<String, String>() }
     var isLoading by remember { mutableStateOf(true) }
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+
+    var previewCard by remember { mutableStateOf<ScryfallDBCard?>(null) }
+
+    previewCard?.let { card ->
+        previewCard?.let { card ->
+            val previewUrl = cardFullArtwork[card.name]
+            if (previewUrl != null) {
+                Popup() {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .systemBarsPadding()
+                            .background(Color.Black.copy(alpha = 0.85f))
+                            .pointerInput(Unit) {
+                                detectTransformGestures { _, pan, zoom, _ ->
+                                    scale *= zoom
+                                    offsetX += pan.x
+                                    offsetY += pan.y
+                                }
+                            }
+                            .clickable { previewCard = null },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(previewUrl),
+                            contentDescription = "Card Preview",
+                            modifier = Modifier
+                                .fillMaxHeight(0.9f)
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                    translationX = offsetX
+                                    translationY = offsetY
+                                }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+
     LaunchedEffect(cardNames) {
         val collectionRequest = CollectionRequest(
             identifiers = cardNames.map { CardIdentifier(it) }
         )
         viewModel.getCardsByCollection(collectionRequest)
     }
+
     LaunchedEffect(viewModel.decklist.value) {
         val fetchedCards = viewModel.decklist.value
 
@@ -108,10 +161,8 @@ fun ViewDeckListTab(
         isLoading = false
     }
 
-
     val groupedBySubTypes = viewModel.decklist.value.groupBy { card ->
-        subTypes.find { it -> card.type_line?.contains(it, ignoreCase = true) == true }
-            ?: "Unknown"
+        subTypes.find { card.type_line?.contains(it, ignoreCase = true) == true } ?: "Unknown"
     }
 
     val types = subTypes.filter { groupedBySubTypes.contains(it) }
@@ -143,11 +194,6 @@ fun ViewDeckListTab(
                     val count = cardCountMap[card.name] ?: 1
 
                     thumbnailUrl?.let { url ->
-                        var showPreview by remember { mutableStateOf(false) }
-                        var scale by remember { mutableStateOf(1f) }
-                        var offsetX by remember { mutableStateOf(0f) }
-                        var offsetY by remember { mutableStateOf(0f) }
-
                         Box(
                             modifier = Modifier
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -157,7 +203,12 @@ fun ViewDeckListTab(
                             Card(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .clickable { showPreview = true },
+                                    .clickable {
+                                        previewCard = card
+                                        scale = 1f
+                                        offsetX = 0f
+                                        offsetY = 0f
+                                    },
                                 colors = CardDefaults.cardColors(Color.Transparent)
                             ) {
                                 Row(
@@ -182,44 +233,6 @@ fun ViewDeckListTab(
                                             .weight(1f)
                                             .padding(end = 12.dp)
                                     )
-                                    if (showPreview) {
-                                        val fullArtworkUrl = cardFullArtwork[card.name]
-                                        fullArtworkUrl?.let { previewUrl ->
-                                            Popup(
-                                                alignment = Alignment.Center,
-                                                onDismissRequest = { showPreview = false }
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .background(Color.Black.copy(alpha = 0.7f))
-                                                        .clickable { showPreview = false },
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    Image(
-                                                        painter = rememberAsyncImagePainter(previewUrl),
-                                                        contentDescription = "Card Preview (Normal Artwork)",
-                                                        modifier = Modifier
-                                                            .fillMaxSize()
-                                                            .clip(RoundedCornerShape(16.dp))
-                                                            .pointerInput(Unit) {
-                                                                detectTransformGestures { _, pan, zoom, _ ->
-                                                                    scale *= zoom
-                                                                    offsetX += pan.x
-                                                                    offsetY += pan.y
-                                                                }
-                                                            }
-                                                            .graphicsLayer {
-                                                                scaleX = scale
-                                                                scaleY = scale
-                                                                translationX = offsetX
-                                                                translationY = offsetY
-                                                            }
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }
