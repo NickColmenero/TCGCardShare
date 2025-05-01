@@ -4,7 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import java.io.File
 
-fun parseDecklist(file: File, source: String): List<Card> {
+fun parseDecklist(file: File, source: String): List<Cardclass> {
     return when (source) {
         "Moxfield" -> parseMoxfieldFile(file)
         "Archidect" -> parseArchidectFile(file)
@@ -14,32 +14,32 @@ fun parseDecklist(file: File, source: String): List<Card> {
 }
 
 
-fun parseArchidectFile(file: File): List<Card> {
+fun parseArchidectFile(file: File): List<Cardclass> {
     val lines = file.readLines()
     return lines.mapNotNull { line ->
         val regex = Regex("""(\d+)x (.*?) \(""")
         val matchResult = regex.find(line)
         matchResult?.let {
             val (quantityStr, name) = it.destructured
-            Card(name.trim(), quantityStr.toInt())
+            Cardclass(name.trim(), quantityStr.toInt())
         }
     }
 }
 
 
-fun parseMoxfieldFile(file: File): List<Card> {
+fun parseMoxfieldFile(file: File): List<Cardclass> {
     val lines = file.readLines()
     return lines.mapNotNull { line ->
         val regex = Regex("""^(\d+)\s+(.+)$""")
         val matchResult = regex.find(line.trim())
         matchResult?.let {
             val (quantityStr, name) = it.destructured
-            Card(name.trim(), quantityStr.toInt())
+            Cardclass(name.trim(), quantityStr.toInt())
         }
     }
 }
 
-fun parseTappedOutFile(file: File): List<Card> {
+fun parseTappedOutFile(file: File): List<Cardclass> {
     val lines = file.readLines()
     return lines.mapNotNull { line ->
         val cleanLine = line.removePrefix("SB:").trim()
@@ -47,8 +47,8 @@ fun parseTappedOutFile(file: File): List<Card> {
         val matchResult = regex.find(cleanLine)
         matchResult?.let {
             val (quantityStr, name) = it.destructured
-            Log.e("Cards imported as objects","${Card(name,quantityStr.toInt())}")
-            Card(name.trim(), quantityStr.toInt())
+            Log.e("Cards imported as objects","${Cardclass(name,quantityStr.toInt())}")
+            Cardclass(name.trim(), quantityStr.toInt())
 
         }
     }
@@ -56,7 +56,7 @@ fun parseTappedOutFile(file: File): List<Card> {
 
 
 
-data class Card(val name: String, val quantity: Int)
+data class Cardclass(val name: String, val quantity: Int)
 
 data class MoxfieldDeck(val cards: List<MoxfieldCard>)
 data class MoxfieldCard(val name: String, val quantity: Int)

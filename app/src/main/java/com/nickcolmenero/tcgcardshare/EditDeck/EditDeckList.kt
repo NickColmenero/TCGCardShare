@@ -76,7 +76,7 @@ fun EditDeckList(
                 .padding(paddingValues)) {
 
                 TabRow(selectedTabIndex = selectedTabIndex) {
-                    listOf("Current Deck", "Search", "Suggestions").forEachIndexed { i, title ->
+                    listOf("Edit Deck", "Search", "Suggestions").forEachIndexed { i, title ->
                         Tab(
                             text = { Text(title) },
                             selected = selectedTabIndex == i,
@@ -85,28 +85,29 @@ fun EditDeckList(
                     }
                 }
                 when (selectedTabIndex) {
-                    0 -> CurrentDeckTab(
+                    0 -> EditDeckTab(
                         navController = navController,
-                        viewModel = viewModel,
+                        deckOwnerID = deckOwnerID,
+                        deckListID = deckListID,
                         deckName = deckName,
-                        deckList = rawDeckList,
-                        selectedFormat = selectedFormat,deckListID
+                        rawDeckList = rawDeckList,
+                        selectedFormat = selectedFormat,
+                        viewModel = viewModel
                     )
                     1 -> CreateDeckSearchScreen(
                         navController = navController,
                         deckName = deckName,
                         deckList = rawDeckList,
                         selectedFormat = selectedFormat,
-                        viewModel
+                       viewModel
                     )
                     2 -> AIDeckHelp(
                         navController = navController,
                         deckList = rawDeckList,
-                        selectedFormat,
+                         selectedFormat,
                         viewModel = viewModel
                     )
                 }
-
             }
         }
     }

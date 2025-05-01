@@ -95,6 +95,7 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
         Log.e("firebase", "Invalid deckOwnerID or decklistID. Cannot fetch data.")
     }
 
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
