@@ -60,12 +60,6 @@ fun DeckItem(deck: DeckViewerModel, navController: NavController, deckOwnerID: S
             onDismissRequest = { showMenu = false }
         ) {
             DropdownMenuItem(
-                text = { Text("Edit") },
-                onClick = {
-                    showMenu = false
-                }
-            )
-            DropdownMenuItem(
                 text = { Text("Delete") },
                 onClick = {
                     showMenu = false

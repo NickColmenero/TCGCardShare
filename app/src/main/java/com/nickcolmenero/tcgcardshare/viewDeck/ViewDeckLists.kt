@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,16 +31,17 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import com.nickcolmenero.tcgcardshare.model.DeckViewerModel
 import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
+import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: String) {
-    val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8) // for comparison in the future to allow users to edit decklists.
+    val currentUser = Firebase.auth.currentUser?.uid.orEmpty()
+        .take(8) // for comparison in the future to allow users to edit decklists.
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val db = FirebaseFirestore.getInstance()
@@ -47,6 +49,7 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
     var deckListToItems by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var deckName by remember { mutableStateOf("") }
+    var deckFormat: String = ""
 
     Log.d("Debug", "deckOwnerID: ${deckOwnerID}")
     Log.d("Debug", "decklistID: ${decklistID}")
@@ -73,6 +76,7 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
                         Log.e("Deck name", "$deckName IS the name")
                         deckInfo = listOf(deck)
                         deckListToItems = deck.rawCards
+                        deckFormat = deck.deckFormat
                         Log.e("deckListToItems", "The imported decklist is: ${deckListToItems}")
 
                         isLoading = false
@@ -110,9 +114,24 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
                                 contentDescription = "Menu"
                             )
                         }
+                    },
+
+                    actions = {
+                        if (currentUser == deckOwnerID) {
+                            IconButton(onClick = {
+                                navController.navigate(
+                                    "EditDeckList/$deckOwnerID/$decklistID"
+                                )
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit Deck")
+                            }
+                        } else {
+                            Log.e("NOT THE OWNER", "Not yours")
+                        }
                     }
                 )
-            },bottomBar = { BottomNavigationBar(navController) }
+            },
+            bottomBar = { BottomNavigationBar(navController) }
         ) { paddingValues ->
             Column(
                 modifier = Modifier
@@ -140,4 +159,3 @@ fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: 
         }
     }
 }
-

@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.nickcolmenero.tcgcardshare.API.AI.ChatScreen
 import com.nickcolmenero.tcgcardshare.CreateDeck.CreateDeckList
+import com.nickcolmenero.tcgcardshare.EditDeck.EditDeckList
 import com.nickcolmenero.tcgcardshare.ImportDeckList.ImportDecklistScreen
 import com.nickcolmenero.tcgcardshare.SeachCards.CardSearchScreen
 import com.nickcolmenero.tcgcardshare.SeachCards.SearchScreenNotDeckBuild
@@ -54,10 +55,20 @@ fun MainApp() {
                 PasswordResetScreen(navController)
             }
             composable("CardSearchScreen") {
-                CardSearchScreen(navController,null,selectedDeckFormat, deckViewModel = DeckListViewModel(),)
+                CardSearchScreen(
+                    navController,
+                    null,
+                    selectedDeckFormat,
+                    deckViewModel = DeckListViewModel(),
+                )
             }
             composable("SearchScreenNotDeckBuild") {
-                SearchScreenNotDeckBuild(navController,null,selectedDeckFormat, deckViewModel = DeckListViewModel())
+                SearchScreenNotDeckBuild(
+                    navController,
+                    null,
+                    selectedDeckFormat,
+                    deckViewModel = DeckListViewModel()
+                )
             }
             composable("CreateDeckList") {
                 CreateDeckList(navController)
@@ -79,8 +90,19 @@ fun MainApp() {
             }
             composable("ImportDecklistScreen")
             {
-                ImportDecklistScreen(DeckListViewModel(),navController)
+                ImportDecklistScreen(DeckListViewModel(), navController)
             }
+            composable("EditDeckList/{deckOwnerID}/{deckListID}") { backStackEntry ->
+                val deckOwnerID = backStackEntry.arguments?.getString("deckOwnerID") ?: ""
+                val deckListID = backStackEntry.arguments?.getString("deckListID") ?: ""
+                EditDeckList(
+                    navController = navController,
+                    deckOwnerID = deckOwnerID,
+                    deckListID = deckListID,
+                    viewModel = DeckListViewModel()
+                )
+            }
+
         }
     }
 }

@@ -9,16 +9,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,10 +58,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.nickcolmenero.tcgcardshare.API.Scryfall.CardIdentifier
+import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequest
+import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequestS
 import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
-import com.nickcolmenero.tcgcardshare.ImportDeckList.Card
+import com.nickcolmenero.tcgcardshare.model.CardListSeperator
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
-import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,11 +73,15 @@ fun CurrentDeckTab(
     viewModel: DeckListViewModel,
     deckName: MutableState<String>,
     deckList: MutableState<String>,
-    selectedFormat: MutableState<String>
+    selectedFormat: MutableState<String>,
+    uniqueDeckID: String
 ) {
+
+
+    Log.e("THE CURRENT deckList value is:", "${deckList}")
     val currentUser = Firebase.auth.currentUser?.uid.orEmpty().take(8)
     val firestore = Firebase.firestore
-    val uniqueDeckID = UUID.randomUUID().toString().replace("-", "").take(5)
+
     val decklistRef = firestore
         .collection("users")
         .document(currentUser)
@@ -94,6 +97,17 @@ fun CurrentDeckTab(
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
+    var importDeck = remember { mutableStateOf("") }
+
+
+    val formats = listOf(
+        "standard", "future", "historic", "timeless", "gladiator", "pioneer",
+        "explorer", "modern", "legacy", "pauper", "vintage", "penny",
+        "commander", "oathbreaker", "standardbrawl", "brawl", "alchemy",
+        "paupercommander", "duel", "oldschool", "premodern", "predh",
+        "canadian highlander"
+    )
+
     if (previewCard != null) {
         Popup() {
             Box(
@@ -129,23 +143,15 @@ fun CurrentDeckTab(
         }
     }
 
-
-    val formats = listOf(
-        "standard", "future", "historic", "timeless", "gladiator", "pioneer",
-        "explorer", "modern", "legacy", "pauper", "vintage", "penny",
-        "commander", "oathbreaker", "standardbrawl", "brawl", "alchemy",
-        "paupercommander", "duel", "oldschool", "premodern", "predh",
-        "canadian highlander"
-    )
-
     val deckSizeMessage = when {
         selectedFormat.value in listOf("commander", "canadian highlander") && deckSize != 100 ->
             "Deck must contain exactly 100 cards for ${selectedFormat.value}."
+
         selectedFormat.value !in listOf("commander", "canadian highlander") && deckSize < 60 ->
             "Deck must contain at least 60 cards for ${selectedFormat.value}."
+
         else -> null
     }
-
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -294,7 +300,8 @@ fun CurrentDeckTab(
                 Button(onClick = {
                     viewModel.removeSingleInstanceOfCard(specificCard!!)
                     val updatedGrouped = viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                    deckList.value = updatedGrouped.entries.joinToString("\n") { (name, cnt) -> "$name x$cnt" }
+                    deckList.value =
+                        updatedGrouped.entries.joinToString("\n") { (name, cnt) -> "$name x$cnt" }
                     specificCard = null
                 }) {
                     Text("Confirm")
@@ -306,7 +313,7 @@ fun CurrentDeckTab(
                 }
             },
             title = { Text("Confirm Deletion") },
-            text = { Text("Are you sure you want to remove this card?" ) }
+            text = { Text("Are you sure you want to remove this card?") }
         )
     }
 
@@ -315,10 +322,12 @@ fun CurrentDeckTab(
             onDismissRequest = { specificCard = null },
             confirmButton = {
                 Button(onClick = {
-                    val groupedDecklist = viewModel.decklist.value.groupingBy { it.name }.eachCount()
-                    val deckString = groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
-                        "[$cardName x$count]"
-                    }
+                    val groupedDecklist =
+                        viewModel.decklist.value.groupingBy { it.name }.eachCount()
+                    val deckString =
+                        groupedDecklist.entries.joinToString(", ") { (cardName, count) ->
+                            "[$cardName x$count]"
+                        }
 
                     if (currentUser.isNotEmpty()) {
                         val deckData = mapOf(

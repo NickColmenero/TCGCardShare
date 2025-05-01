@@ -30,12 +30,14 @@ import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 import com.nickcolmenero.tcgcardshare.ui_elements.BottomNavigationBar
 import com.nickcolmenero.tcgcardshare.ui_elements.NavigationDrawerContent
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = viewModel()) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val uniqueDeckID = UUID.randomUUID().toString().replace("-", "").take(5)
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -87,7 +89,7 @@ fun CreateDeckList(navController: NavController, viewModel: DeckListViewModel = 
                         viewModel,
                         deckName,
                         deckList,
-                        selectedDeckFormat
+                        selectedDeckFormat,uniqueDeckID
                     )
 
                     1 -> CreateDeckSearchScreen(
