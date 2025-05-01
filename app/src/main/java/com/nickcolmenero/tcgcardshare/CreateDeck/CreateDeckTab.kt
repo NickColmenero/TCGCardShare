@@ -58,11 +58,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
-import com.nickcolmenero.tcgcardshare.API.Scryfall.CardIdentifier
-import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequest
-import com.nickcolmenero.tcgcardshare.API.Scryfall.CollectionRequestS
 import com.nickcolmenero.tcgcardshare.API.Scryfall.ScryfallDBCard
-import com.nickcolmenero.tcgcardshare.model.CardListSeperator
 import com.nickcolmenero.tcgcardshare.model.DeckListViewModel
 
 
