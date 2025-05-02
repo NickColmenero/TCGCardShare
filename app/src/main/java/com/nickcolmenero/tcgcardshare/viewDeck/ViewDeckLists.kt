@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ViewDeckList(navController: NavController, deckOwnerID: String, decklistID: String) {
     val currentUser = Firebase.auth.currentUser?.uid.orEmpty()
-        .take(8) // for comparison in the future to allow users to edit decklists.
+        .take(8)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val db = FirebaseFirestore.getInstance()

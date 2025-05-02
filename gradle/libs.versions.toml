@@ -44,6 +44,7 @@ roomKtx = "2.4.2"
 roomRuntime = "2.6.1"
 roomRuntimeVersion = "2.4.2"
 runtimeLivedata = "1.7.6"
+swiperefreshlayout = "1.1.0"
 ui = "1.0.0"
 zxingAndroidEmbedded = "4.2.0"
 
@@ -59,6 +60,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-ktx-v242 = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-room-runtime-v242 = { module = "androidx.room:room-runtime", version.ref = "roomRuntimeVersion" }
+androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 coil-compose-v210 = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core = { module = "com.google.zxing:core", version.ref = "core" }

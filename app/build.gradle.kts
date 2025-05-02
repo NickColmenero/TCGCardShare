@@ -93,4 +93,5 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation (libs.core)
     implementation (libs.zxing.android.embedded)
+    implementation (libs.androidx.swiperefreshlayout)
 }

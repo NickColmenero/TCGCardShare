@@ -91,7 +91,6 @@ fun EditDeckTab(
         "Battle"
     )
 
-    // Fetch deck details from Firestore
     LaunchedEffect(deckListID) {
         val docRef = db.collection("users")
             .document(deckOwnerID)
@@ -112,7 +111,6 @@ fun EditDeckTab(
             }
     }
 
-    // Parse raw decklist into card names and counts
     val cardItems = remember(rawDeckList.value) {
         rawDeckList.value
             .removePrefix("[")
@@ -138,7 +136,6 @@ fun EditDeckTab(
 
     var previewCard by remember { mutableStateOf<ScryfallDBCard?>(null) }
 
-    // Fetch card details for thumbnails and artwork
     LaunchedEffect(cardNames) {
         val collectionRequest = CollectionRequest(
             identifiers = cardNames.map { CardIdentifier(it) }
@@ -157,7 +154,6 @@ fun EditDeckTab(
             }
         }
     }
-    // Display deck edit interface
     if (isLoading) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -179,7 +175,7 @@ fun EditDeckTab(
                 OutlinedTextField(
                     value = deckName.value,
                     onValueChange = { deckName.value = it },
-                    label = { Text("Deck Name") },
+                   label = { Text("Deck Name") },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -196,7 +192,7 @@ fun EditDeckTab(
                         trailingIcon = {
                             Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon")
                         },
-                        modifier = Modifier.menuAnchor()
+                       modifier = Modifier.menuAnchor()
                     )
 
                     ExposedDropdownMenu(
@@ -209,9 +205,9 @@ fun EditDeckTab(
                                 onClick = {
                                     selectedFormat.value = format
                                     expanded = false
-                                }
+                               }
                             )
-                        }
+                       }
                     }
                 }
             }
@@ -231,7 +227,7 @@ fun EditDeckTab(
 
                     thumbnailUrl?.let { url ->
                         Box(
-                            modifier = Modifier
+                           modifier = Modifier
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                                 .fillMaxWidth()
                                 .height(60.dp)
@@ -239,7 +235,7 @@ fun EditDeckTab(
                             Card(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .clickable {
+                                   .clickable {
                                         previewCard =
                                             viewModel.decklist.value.find { it.name == card.name }
                                     },
@@ -268,46 +264,12 @@ fun EditDeckTab(
                                         )
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            IconButton(
-                                                onClick = {
-                                                    val newCount =
-                                                        (cardCountMap[card.name] ?: 1) + 1
-                                                    cardCountMap[card.name] = newCount
-                                                    rawDeckList.value = rawDeckList.value.replace(
-                                                        "${card.name} x${count}",
-                                                        "${card.name} x$newCount"
-                                                    )
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.Add,
-                                                    contentDescription = "Increase Count"
-                                                )
-                                            }
+                                        ){
                                             Text(
                                                 text = "x$count",
                                                 modifier = Modifier.padding(horizontal = 4.dp)
                                             )
-                                            IconButton(
-                                                onClick = {
-                                                    val newCount =
-                                                        (cardCountMap[card.name] ?: 1) - 1
-                                                    if (newCount > 0) {
-                                                        cardCountMap[card.name] = newCount
-                                                        rawDeckList.value =
-                                                            rawDeckList.value.replace(
-                                                                "${card.name} x${count}",
-                                                                "${card.name} x$newCount"
-                                                            )
-                                                    }
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.Delete,
-                                                    contentDescription = "Decrease Count"
-                                                )
-                                            }
+
                                         }
                                     }
                                 }
@@ -320,10 +282,8 @@ fun EditDeckTab(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Save Button
             Button(
                 onClick = {
-                    // Save updated decklist to Firestore
                     val deckRef = db.collection("users")
                         .document(deckOwnerID)
                         .collection("decks")
@@ -342,7 +302,6 @@ fun EditDeckTab(
         }
     }
 
-    // Preview Card (when clicked)
     previewCard?.let { card ->
         val previewUrl = cardFullArtwork[card.name]
         if (previewUrl != null) {
