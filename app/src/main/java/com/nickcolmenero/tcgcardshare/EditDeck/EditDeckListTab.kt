@@ -167,56 +167,56 @@ fun EditDeckTab(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = deckName.value,
-                    onValueChange = { deckName.value = it },
-                   label = { Text("Deck Name") },
-                    modifier = Modifier.weight(1f)
-                )
-
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    OutlinedTextField(
-                        value = selectedFormat.value,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Select Format") },
-                        trailingIcon = {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon")
-                        },
-                       modifier = Modifier.menuAnchor()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        formats.forEach { format ->
-                            DropdownMenuItem(
-                                text = { Text(format) },
-                                onClick = {
-                                    selectedFormat.value = format
-                                    expanded = false
-                               }
-                            )
-                       }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Cards",
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.spacedBy(3.dp),
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                OutlinedTextField(
+//                    value = deckName.value,
+//                    onValueChange = { deckName.value = it },
+//                   label = { Text("Deck Name") },
+//                    modifier = Modifier.weight(1f)
+//                )
+//
+//                ExposedDropdownMenuBox(
+//                    expanded = expanded,
+//                    onExpandedChange = { expanded = !expanded },
+//                    modifier = Modifier.weight(1f)
+//                ) {
+//                    OutlinedTextField(
+//                        value = selectedFormat.value,
+//                        onValueChange = {},
+//                        readOnly = true,
+//                        label = { Text("Select Format") },
+//                        trailingIcon = {
+//                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon")
+//                        },
+//                       modifier = Modifier.menuAnchor()
+//                    )
+//
+//                    ExposedDropdownMenu(
+//                        expanded = expanded,
+//                        onDismissRequest = { expanded = false }
+//                    ) {
+//                        formats.forEach { format ->
+//                            DropdownMenuItem(
+//                                text = { Text(format) },
+//                                onClick = {
+//                                    selectedFormat.value = format
+//                                    expanded = false
+//                               }
+//                            )
+//                       }
+//                    }
+//                }
+//            }
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            Text(
+//                text = "Cards",
+//                modifier = Modifier.padding(vertical = 8.dp)
+//            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()

@@ -9,6 +9,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -61,7 +62,7 @@ fun EditDeckList(
 
 
 
-
+    // Fetch deck details from Firestore
     LaunchedEffect(deckListID) {
         val docRef = db.collection("users")
             .document(deckOwnerID)
@@ -82,6 +83,7 @@ fun EditDeckList(
             }
     }
 
+    // Parse raw decklist into card names and counts
     val cardItems = remember(rawDeckList.value) {
         rawDeckList.value
             .removePrefix("[")
@@ -103,6 +105,7 @@ fun EditDeckList(
 
     var previewCard by remember { mutableStateOf<ScryfallDBCard?>(null) }
 
+    // Fetch card details for thumbnails and artwork
     LaunchedEffect(cardNames) {
         val collectionRequest = CollectionRequest(
             identifiers = cardNames.map { CardIdentifier(it) }
@@ -132,7 +135,7 @@ fun EditDeckList(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Edit Deck") },
+                    title = { Text("Edit Deck",color = MaterialTheme.colorScheme.primary) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -161,6 +164,10 @@ fun EditDeckList(
                 when (selectedTabIndex) {
 
 
+
+//                    0-> ViewDeckListTab(
+//                        navController,deckOwnerID,deckListID,rawDeckList.toString(),viewModel
+//                    )
                     1 -> CurrentDeckTab(
                         navController = navController,
                         deckName = deckName,
@@ -171,16 +178,19 @@ fun EditDeckList(
                     )
 
 
-                    0 ->
-                        EditDeckTab(
-                            navController = navController,
-                            deckOwnerID = deckOwnerID,
-                            deckListID = deckListID,
-                            deckName = deckName,
-                            rawDeckList = rawDeckList,
-                            selectedFormat = selectedFormat,
-                            viewModel
-                        )
+//                    0 ->
+//                        EditDeckTab(
+//                            navController = navController,
+//                            deckOwnerID = deckOwnerID,
+//                            deckListID = deckListID,
+//                            deckName = deckName,
+//                            rawDeckList = rawDeckList,
+//                            selectedFormat = selectedFormat,
+//                            viewModel
+//                        )
+                    0-> ViewDeckListTab(
+                        navController,deckOwnerID,deckListID,rawDeckList.toString(),viewModel
+                    )
 
 
                     2 ->  CreateDeckSearchScreen(
