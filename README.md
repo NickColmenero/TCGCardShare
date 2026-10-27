@@ -1,31 +1,46 @@
 # TCGCardShare
 TCGCardShare is an application that allows users to easily share their Magic the Gathering decks with each other.
 
-It has an array of features including:
-Creation of a deck list:
-  
-  -Modern Materials3 design is used for the creation of the list and the application
-      -Materials3 allows the application to use the image of the card and an art preview when adding them to a deck.*
- 
-  -A user can search for cards in real time and add them to a deck
-    >*this includes all of the statistics of the card since they are all fetched (30 at a time)*
- 
-  -A user can edit how many copies of each card are added to the deck
-    >*By tapping the + or - the user can fully remove or increment the number of copies of a card in a deck*
-  
+Features
+Deck List Creation
 
-    
-Editing of a deck list:
-  -A user can edit their own deck lists at any time:
-    -The application makes sure that you own the list so no one can edit your lists
-    -A user can delete a deck if it is no longer assembled
-    -A user can import their ChatGPT API code in order to get AI help with their deck list
-    
-import deck feature:
-  -supports formats from the most popular deck building sites
-   -Included sites/formats
-     -Moxfield,Manabox,MTGOnline,Scryfall,TappedOut
-Custom built QR system
-  -only fetches decks using the application it is tied to a unique ID and does not traverse the web through a link
-  -Generates when a deck is built or imported
-  
+Material 3 Design
+Uses Material 3 design principles throughout the application and deck creation interface.
+Supports card images and artwork previews when adding cards to a deck.
+Real-Time Card Search
+Search for cards in real time and add them directly to a deck.
+Fetches card statistics and related information in batches of 30 cards at a time.
+Card Quantity Management
+Adjust the number of copies of each card in a deck using the + and - buttons.
+Decrease a card's quantity or remove it from the deck entirely.
+Deck List Management
+
+Edit Your Decks
+
+Edit your own deck lists at any time.
+Ownership verification ensures that users can only edit their own deck lists.
+Delete Decks
+Permanently delete deck lists that are no longer needed or assembled.
+AI-Powered Deck Assistance
+Import your ChatGPT API key to get AI-powered assistance with your deck lists.
+
+Deck Import
+
+Import existing deck lists from some of the most popular deck-building platforms.
+
+Supported platforms and formats:
+
+Moxfield
+ManaBox
+MTGO (Magic: The Gathering Online)
+Scryfall
+TappedOut
+
+Custom QR Code System
+
+Unique Deck Identification
+Each deck is associated with a unique ID used by the application's QR code system.
+Application-Specific Retrieval
+QR codes retrieve decks through the application using their unique IDs rather than navigating to external web links.
+Automatic QR Code Generation
+QR codes are generated automatically when a deck is created or imported.
