@@ -5,16 +5,13 @@ It has an array of features including:
 Creation of a deck list:
   
   -Modern Materials3 design is used for the creation of the list and the application
-    
-    -Materials3 allows the application to use the image of the card and an art preview when adding them to a deck.
+    *-Materials3 allows the application to use the image of the card and an art preview when adding them to a deck.*
  
   -A user can search for cards in real time and add them to a deck
-    
-    -this includes all of the statistics of the card since they are all fetched (30 at a time)
+    *this includes all of the statistics of the card since they are all fetched (30 at a time)*
  
   -A user can edit how many copies of each card are added to the deck
-    
-    -By tapping the + or - the user can fully remove or increment the number of copies of a card in a deck
+    *By tapping the + or - the user can fully remove or increment the number of copies of a card in a deck*
   
 
     
